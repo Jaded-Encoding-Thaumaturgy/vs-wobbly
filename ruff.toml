@@ -1,0 +1,15 @@
+line-length = 120
+indent-width = 4
+
+target-version = "py312"
+required-version = ">=0.6.9"
+
+output-format = 'github'
+show-fixes = true
+
+[format]
+docstring-code-format = true
+quote-style = 'single'
+indent-style = 'space'
+skip-magic-trailing-comma = false
+line-ending = 'auto'
