@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Any
 
-from stgpytools import fallback
-from vstools import CustomValueError, VSFunctionNoArgs, replace_ranges, vs
+from vstools import (CustomValueError, VSFunctionNoArgs, fallback,
+                     replace_ranges, vs)
 
 from ..exceptions import NegativeFrameError
 

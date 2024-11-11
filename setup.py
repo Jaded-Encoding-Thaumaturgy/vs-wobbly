@@ -23,6 +23,10 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     packages=[
         package_name,
+        f'{package_name}.components',
+        f'{package_name}.data',
+        f'{package_name}.exceptions',
+        f'{package_name}.strategies',
     ],
     package_data={
         package_name: ['py.typed', 'models/shaders/*/*.onnx'],

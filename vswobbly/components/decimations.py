@@ -1,4 +1,4 @@
-from stgpytools import fallback
+from vstools import fallback
 
 from ..exceptions import NegativeFrameError
 from ..util import deduplicate_list

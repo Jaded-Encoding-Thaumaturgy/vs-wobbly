@@ -1,1 +1,3 @@
 VapourSynth>=70
+vstools>=3.3.3
+vsdeinterlace>=0.8.0

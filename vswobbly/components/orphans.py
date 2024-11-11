@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import Self
 
-from stgpytools import fallback
-from vstools import CustomValueError
+from vstools import CustomValueError, fallback
 
 from ..exceptions import NegativeFrameError
 from .matches import FieldMatches, ValidMatchT

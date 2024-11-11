@@ -42,7 +42,7 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Running tests
-        run: pytest --cov-report=term-missing:skip-covered --cov=vstools tests
+        run: pytest --cov-report=term-missing:skip-covered --cov=vswobbly tests
 
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2.3.1

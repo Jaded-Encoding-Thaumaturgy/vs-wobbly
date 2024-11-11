@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
-from stgpytools import fallback
-from vstools import CustomRuntimeError, CustomValueError, vs
+from vstools import CustomRuntimeError, CustomValueError, fallback, vs
 
 from ..exceptions import NegativeFrameError
 
