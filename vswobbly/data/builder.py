@@ -139,12 +139,21 @@ class WobblyBuilder:
 
     def _process_sections(self, data: list[dict]) -> list[Section]:
         """Process sections and handle their presets."""
+
         preset_lookup = self._build_preset_lookup()
         processed_items = []
 
         for section in data:
             section_dict = self._to_snake_case(section)
-            section_presets = [preset_lookup[p] for p in section_dict.get('presets', []) if p in preset_lookup]
+            section_presets = []
+
+            for preset_list in section_dict.get('presets', []):
+                if isinstance(preset_list, str):
+                    if preset_list in preset_lookup:
+                        section_presets.append(preset_lookup[preset_list])
+                elif isinstance(preset_list, list):
+                    section_presets.extend(preset_lookup[p] for p in preset_list if p in preset_lookup)
+
             section_dict['presets'] = section_presets
             processed_items.append(Section(**section_dict))
 
