@@ -35,6 +35,8 @@ class WobblyBuilder:
 
         self._check_file_path()
         self._load_data()
+
+        WobblyValidator.validate_version(self._data)
         WobblyValidator.validate_json_structure(self._data)
 
         video_data = self._build_video_data()

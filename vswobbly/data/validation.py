@@ -21,3 +21,14 @@ class WobblyValidator:
             raise WobblyValidationError(
                 f"Missing required fields: {missing}", WobblyValidator.validate_json_structure
             )
+
+    @staticmethod
+    def validate_version(data: dict[str, Any]) -> None:
+        """Validate the version of a wobbly file."""
+
+        if (version := data.get('wobbly version', 0)) < 6:
+            raise WobblyValidationError(
+                f"Unsupported wobbly version: {version}. Minimum supported version is 8. Please update!",
+                WobblyValidator.validate_version
+            )
+
