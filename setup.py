@@ -26,7 +26,8 @@ setuptools.setup(
         f'{package_name}.components',
         f'{package_name}.data',
         f'{package_name}.exceptions',
-        f'{package_name}.strategies',
+        f'{package_name}.process',
+        f'{package_name}.process.strategies',
     ],
     package_data={
         package_name: ['py.typed', 'models/shaders/*/*.onnx'],
