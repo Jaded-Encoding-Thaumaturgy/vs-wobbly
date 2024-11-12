@@ -9,10 +9,10 @@
     <img alt="downloads" src="https://static.pepy.tech/personalized-badge/vswobbly?period=total&units=international_system&left_color=grey&right_color=blue&left_text=downloads">
 </p>
 
-A collection of VapourSynth functions for parsing wobbly files.
+A collection of VapourSynth functions for parsing and filtering wobbly files.
 Full information on how every function works,
 as well as a list of dependencies and links,
-can be found in the docstrings of each function.
+can be found in the docstrings of each function and class.
 For further support,
 drop by `#dev` in the [JET Discord server](https://discord.gg/XTpc6Fa9eB).
 
@@ -26,6 +26,56 @@ pip install vswobbly
 
 ## How to use
 
+Simplest way to use it is to pass a wobbly file (`.wob`) to `WobblyProcessor.from_file()`,
+followed by calling `apply()`.
+
 ```python
-import vswobbly as wobbly
+from vswobbly import WobblyProcessor,
+
+wob = WobblyProcessor.from_file('C:/path/to/wobbly.wob')
+clip = wob.apply()
 ```
+
+If you only need the parsed wobbly data,
+you can use `WobblyParser.from_file()`:
+
+```python
+from vswobbly import WobblyParser
+
+wob = WobblyParser.from_file('C:/path/to/wobbly.wob')
+```
+
+This will return a `WobblyParser` data class,
+containing all the relevant data for video processing.
+Note that metadata, information about wobbly's UI,
+and wibbly parameters are currently excluded.
+
+### Strategies
+
+Different "strategies" can be passed to `WobblyProcessor`
+to change how certain problems are handled internally.
+This package comes with a handful included.
+
+For example,
+automatically handling combed frames
+with vinverse:
+
+```python
+from vswobbly import WobblyProcessor, DecombVinverseStrategy
+
+wob = WobblyProcessor.from_file(
+    'C:/path/to/wobbly.wob',
+    combed_frames_strategy=DecombVinverseStrategy()
+)
+
+clip = wob.apply()
+```
+
+Which would then run the [DecombVinverseStrategy](./vswobbly/process/strategies/combed.py) strategy
+on all combed frames.
+
+This is written to be really flexible,
+and allow users to handle these problems however they see fit.
+To implement your own strategy,
+create a class and inherit from [AbstractProcessingStrategy](./vswobbly/process/strategies/abstract.py).
+Refer to the existing strategies and the docstrings of the abstract class for examples.
