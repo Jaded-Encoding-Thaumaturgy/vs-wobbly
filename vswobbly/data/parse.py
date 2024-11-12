@@ -10,6 +10,7 @@ __all__ = [
     'WobblyParser',
 ]
 
+
 @dataclass
 class WobblyParser:
     """Class for parsing wobbly files."""
