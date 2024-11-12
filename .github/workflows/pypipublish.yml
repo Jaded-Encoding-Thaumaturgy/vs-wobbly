@@ -1,14 +1,16 @@
 name: Publish releases to PyPI
 
 on:
-    push:
+    workflow_run:
+        workflows: ["Check and create tag"]
+        types:
+            - completed
         branches:
-          - master
-        tags:
-            - v[0-9]+**
+            - master
 
 jobs:
     package_build:
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
         name: Build and publish to PyPI
         runs-on: ubuntu-latest
         environment:
