@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
+from math import ceil
 
-from vstools import Keyframes
+from vstools import Keyframes, vs
 
 from ..exceptions import NegativeFrameError
 from .decimations import Decimations
@@ -31,7 +32,6 @@ class Sections(list[Section]):
 
     def __init__(self, sections: list[Section]) -> None:
         super().__init__(sections or [])
-
     def __str__(self) -> str:
         if not self:
             return ''
@@ -66,3 +66,38 @@ class Sections(list[Section]):
         """The JSON key for sections."""
 
         return 'sections'
+
+    def set_props(self, clip: vs.VideoNode, wobbly_parsed: 'WobblyParser') -> vs.VideoNode:  # noqa: F821
+        """Set the section properties on the clip."""
+
+        wclip = wobbly_parsed.work_clip
+        # Ideally we get the cycle from the vfm params, but wobbly is hardcoded to 5 anyway.
+        cycle = 5
+
+        framerates = [wclip.fps.numerator / cycle * i for i in range(cycle, 0, -1)]
+
+        fps_clips = [
+            clip.std.AssumeFPS(None, int(fps), wclip.fps.denominator)
+            .std.SetFrameProps(
+                WobblyCycleFps=int(fps // 1000),
+                _DurationNum=int(fps),
+                _DurationDen=wclip.fps.denominator
+            ) for fps in framerates
+        ]
+
+        max_dec = max(wobbly_parsed.decimations) + 1
+
+        split_decimations = [
+            [j for j in range(i * cycle, min((i + 1) * cycle, max_dec)) if j in wobbly_parsed.decimations]
+            for i in range(ceil(max_dec / cycle))
+        ]
+
+        n_split_decimations = len(split_decimations)
+
+        indices = [
+            0 if (sd_idx := ceil(n / cycle)) >= n_split_decimations
+            else len(split_decimations[sd_idx]) for n in range(clip.num_frames)
+        ]
+
+        return clip.std.FrameEval(lambda n: fps_clips[indices[n]])
+

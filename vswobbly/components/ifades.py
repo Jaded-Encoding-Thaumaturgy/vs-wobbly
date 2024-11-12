@@ -100,6 +100,15 @@ class InterlacedFades(list[InterlacedFade]):
             clip, filter(clip), lambda n: n in set().union(*(fade.frame for fade in self))
         )
 
+    def set_props(self, clip: vs.VideoNode) -> vs.VideoNode:
+        """Set the interlaced fade properties on the clip."""
+
+        return replace_ranges(
+            clip.std.SetFrameProps(WobblyInterlacedFades=False),
+            clip.std.SetFrameProps(WobblyInterlacedFades=True),
+            [fade.frame for fade in self]
+        )
+
     @classmethod
     def wob_json_key(cls) -> str:
         """The JSON key for interlaced fades."""

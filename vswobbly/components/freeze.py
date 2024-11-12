@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from vstools import CustomRuntimeError, CustomValueError, fallback, vs
+from vstools import replace_ranges, CustomValueError, fallback, vs
 
 from ..exceptions import NegativeFrameError
 
@@ -48,14 +48,34 @@ class FreezeFrames(list[FreezeFrame]):
     def apply(self, clip: vs.VideoNode) -> vs.VideoNode:
         """Apply the freeze frames to the clip."""
 
-        try:
-            return clip.std.FreezeFrames(
-                [freeze.first for freeze in self],
-                [freeze.last for freeze in self],
-                [freeze.replacement for freeze in self]
+        if len(self) == 0:
+            return clip
+
+        # I realise this is slower! See _better_apply for a faster WIP implementation.
+        for freeze in self:
+            frozen = clip.std.FreezeFrames(freeze.first, freeze.last, freeze.replacement)
+            frozen = frozen.std.SetFrameProps(WobblyFreeze=[freeze.first, freeze.last, freeze.replacement])
+
+            clip = replace_ranges(clip, frozen, [(freeze.first, freeze.last)])
+
+        return clip
+
+    # TODO: Finish implementing this
+    def _better_apply(self, clip: vs.VideoNode) -> vs.VideoNode:
+        firsts, lasts, replacements = [], [], []
+
+        for freeze in self:
+            firsts.append(freeze.first)
+            lasts.append(freeze.last)
+            replacements.append(freeze.replacement)
+
+            clip = replace_ranges(
+                clip, clip.std.SetFrameProps(WobblyFreeze=[freeze.first, freeze.last, freeze.replacement]),
+                [(freeze.first, freeze.last)]
             )
-        except Exception as e:
-            raise CustomRuntimeError(f'Failed to apply freeze frames: {e}', self.apply)
+
+        # TODO: The current issue is that props don't persist if the replacement isn't in the range of (first, last).
+        return clip.std.FreezeFrames(firsts, lasts, replacements)
 
     @classmethod
     def wob_json_key(cls) -> str:

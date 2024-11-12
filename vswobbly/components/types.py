@@ -1,11 +1,9 @@
-from typing import Iterator, Literal, Protocol, Sequence
+from typing import Any, Iterator, Literal, Protocol, Sequence
 
-from vstools import CustomStrEnum, vs
+from vstools import vs
 
 __all__ = [
     'ValidMatchT',
-
-    'CustomPresetPosition',
 
     'PresetProtocol',
     'SectionProtocol',
@@ -30,7 +28,7 @@ class PresetProtocol(Protocol):
     """Protocol defining the interface for presets."""
 
     name: str
-    def apply(self, clip: vs.VideoNode) -> vs.VideoNode: ...
+    def apply(self, clip: vs.VideoNode, **kwargs: Any) -> vs.VideoNode: ...
 
 
 class SectionProtocol(Protocol):
@@ -44,22 +42,3 @@ class SectionsProtocol(Protocol):
     """Protocol defining the interface for a collection of sections."""
 
     def __iter__(self) -> Iterator[SectionProtocol]: ...
-
-
-class CustomPresetPosition(CustomStrEnum):
-    """Enum denoting when to apply a preset."""
-
-    POST_SOURCE = 'post source'
-    """Apply the preset to the source clip."""
-
-    POST_FIELD_MATCH = 'post field match'
-    """Apply the preset after field matching."""
-
-    PRE_DECIMATION = 'pre decimation'
-    """
-    Apply the preset before decimation.
-    This is used by section presets.
-    """
-
-    POST_DECIMATION = 'post decimation'
-    """Apply the preset after decimation."""

@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from typing import Self
 
-from vstools import CustomValueError, fallback
+from vstools import CustomValueError, fallback, replace_ranges, vs
 
 from ..exceptions import NegativeFrameError
 from .matches import FieldMatches, ValidMatchT
-from .sections import Sections
 
 __all__ = [
     'OrphanFrame',
@@ -29,7 +28,7 @@ class OrphanFrame:
     def __post_init__(self) -> None:
         NegativeFrameError.check(self.__class__, self.frame)
 
-        if self.match not in ValidMatchT.__args__:
+        if self.match not in ValidMatchT.__args__:  # type: ignore
             raise CustomValueError(f'Invalid match character: {self.match}', self)
 
         if self.match == 'c':
@@ -62,11 +61,11 @@ class OrphanFrames(list[OrphanFrame]):
     def __init_subclass__(cls) -> None:
         """Create matches properties for the class."""
 
-        for match in ValidMatchT.__args__:  # type: ignore
+        for match in cls.ValidMatchT.__args__:  # type: ignore
             if match == 'c':
                 continue
 
-            def create_match_property(match: ValidMatchT) -> property:
+            def create_match_property(match: cls.ValidMatchT) -> property:
                 """Create a match property for the class."""
 
                 def getter(self: OrphanFrames) -> list[OrphanFrame]:
@@ -85,28 +84,25 @@ class OrphanFrames(list[OrphanFrame]):
         return ', '.join(str(frame) for frame in self)
 
     @classmethod
-    def from_sections(cls, sections: Sections, matches: FieldMatches) -> Self:
+    def from_sections(cls, sections: 'Sections', matches: 'FieldMatches') -> Self:  # noqa: F821
         """Create orphan frames from sections and matches."""
 
         orphans = []
 
         for idx, section in enumerate(sections):
-            # Check start frame for next-field match
             if matches[section.start] == 'n':
                 orphans.append(OrphanFrame(section.start, 'n'))
 
-            # Get end frame for this section
             end_frame = (
                 sections[idx + 1].start - 1
                 if idx < len(sections) - 1
                 else len(matches) - 1
             )
 
-            # Check end frame for bottom-field match
             if matches[end_frame] == 'b':
                 orphans.append(OrphanFrame(end_frame, 'b'))
 
-        return cls(orphans)
+        return OrphanFrames(orphans)
 
     def find_frame(self, frame: int) -> OrphanFrame | None:
         """Find a frame in the list."""
@@ -120,3 +116,12 @@ class OrphanFrames(list[OrphanFrame]):
         """Find all frames with a specific match."""
 
         return [f for f in self if f.match == match]
+
+    def set_props(self, clip: vs.VideoNode) -> vs.VideoNode:
+        """Set the orphan frame properties on the clip."""
+
+        return replace_ranges(
+            clip.std.SetFrameProps(WobblyOrphanFrame=False),
+            clip.std.SetFrameProps(WobblyOrphanFrame=True),
+            self
+        )

@@ -1,10 +1,14 @@
 from dataclasses import dataclass
-from typing import Self
+from typing import Any, Self
 
-from vstools import (CustomRuntimeError, CustomValueError, FrameRangesN,
-                     replace_ranges, vs)
+from vstools import (
+    CustomRuntimeError, CustomValueError, FrameRangesN,
+    replace_ranges, vs
+)
 
-from .types import CustomPresetPosition, PresetProtocol, SectionsProtocol
+from .presets import Preset
+from ..types import FilteringPositionEnum
+from .types import PresetProtocol, SectionsProtocol
 
 __all__ = [
     'CustomList',
@@ -22,7 +26,7 @@ class CustomList:
     preset: PresetProtocol
     """The preset used for this custom list."""
 
-    position: CustomPresetPosition
+    position: FilteringPositionEnum
     """When to apply the preset."""
 
     frames: FrameRangesN
@@ -33,8 +37,17 @@ class CustomList:
             kwargs['frames'] = self._frames_to_ranges(kwargs['frames'])
 
         self.name = kwargs.get('name', '')
-        self.preset = kwargs.get('preset', '')
-        self.position = CustomPresetPosition(kwargs.get('position', 'pre decimation'))
+
+        preset_data = kwargs.get('preset', '')
+
+        if isinstance(preset_data, dict):
+            self.preset = Preset(**preset_data)
+        elif isinstance(preset_data, Preset):
+            self.preset = preset_data
+        else:
+            raise CustomValueError('Invalid preset data type', self)
+
+        self.position = FilteringPositionEnum(kwargs.get('position', 'pre decimation'))
         self.frames = kwargs.get('frames', [])
 
     def __post_init__(self) -> None:
@@ -42,6 +55,11 @@ class CustomList:
 
         if not self.frames:
             raise CustomValueError('Custom list frames cannot be empty!', self)
+
+    def __call__(self, clip: vs.VideoNode, **kwargs: Any) -> vs.VideoNode:
+        """Apply the custom list to a given clip."""
+
+        return self.apply(clip, **kwargs)
 
     @staticmethod
     def _frames_to_ranges(frames: list[list[int]]) -> FrameRangesN:
@@ -63,23 +81,35 @@ class CustomList:
 
         return ranges
 
-    def apply(self, clip: vs.VideoNode) -> vs.VideoNode:
+    def apply(self, clip: vs.VideoNode, **kwargs: Any) -> vs.VideoNode:
         """Apply the custom list to a given clip."""
 
         try:
-            return replace_ranges(clip, self.preset.apply(clip), self.frames)
+            flt = self.preset.apply(clip, **kwargs)
         except Exception as e:
             raise CustomRuntimeError(
-                f'Error applying preset of custom list \'{self.name}\': {e}',
+                f'Error applying preset of custom list \'{self.name}\': '
+                f'Invalid Python code in preset contents. Original error: {e}',
                 self.apply
             )
+
+        for start, end in self._frames_to_ranges(self.frames):
+            range_flt = flt.std.SetFrameProps(
+                WobblyPreset=str(self.preset),
+                WobblyPresetPosition=self.position.value,
+                WobblyPresetFrames=[start, end]
+            )
+
+            clip = replace_ranges(clip, range_flt, [(start, end)])
+
+        return clip
 
 class CustomLists(list[CustomList]):
     """Class for holding a list of custom lists."""
 
     def __str__(self) -> str:
         return ', '.join(
-            f'{custom_list.name}: preset={custom_list.preset.name}, '
+            f'{custom_list.name}: preset={custom_list.preset}, '
             f'position={custom_list.position.name}, frames={custom_list.frames}'
             for custom_list in self
         )
@@ -91,8 +121,8 @@ class CustomLists(list[CustomList]):
         return cls(
             CustomList(
                 f'section_{section.start}',
-                section.presets[0],
-                CustomPresetPosition.PRE_DECIMATION,
+                section.presets,
+                FilteringPositionEnum.PRE_DECIMATE,
                 FrameRangesN(section.start)
             )
             for section in sections

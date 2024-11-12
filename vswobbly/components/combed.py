@@ -1,4 +1,4 @@
-from vstools import fallback
+from vstools import fallback, replace_ranges, vs
 
 from ..exceptions import NegativeFrameError
 from ..util import deduplicate_list
@@ -44,3 +44,12 @@ class CombedFrames(list[int]):
             raise ValueError(f'Frame {frame} not found!')
 
         return found
+
+    def set_props(self, clip: vs.VideoNode) -> vs.VideoNode:
+        """Set the combed frame properties on the clip."""
+
+        return replace_ranges(
+            clip.std.SetFrameProps(WobblyCombed=False),
+            clip.std.SetFrameProps(WobblyCombed=True),
+            self
+        )

@@ -1,5 +1,6 @@
 import ast
 from dataclasses import dataclass
+from typing import Any
 
 from vstools import CustomValueError, vs
 
@@ -31,7 +32,15 @@ class Preset:
 
         self._check_code_exec()
 
-    def apply(self, clip: vs.VideoNode) -> vs.VideoNode:
+    def __call__(self, clip: vs.VideoNode, **kwargs: Any) -> vs.VideoNode:
+        """Apply the preset code to a given clip."""
+
+        return self.apply(clip, **kwargs)
+
+    def __str__(self) -> str:
+        return f'{self.name}:\n\n{self.contents}'
+
+    def apply(self, clip: vs.VideoNode, **kwargs: Any) -> vs.VideoNode:
         """Apply the preset code to a given clip."""
 
         namespace = {'clip': clip}
@@ -103,10 +112,7 @@ class Presets(list[Preset]):
         super().__init__(presets or [])
 
     def __str__(self) -> str:
-        return ', '.join(
-            f'{preset.name} ({"UNSAFE" if preset.allow_unsafe else "SAFE"}): {preset.contents}'
-            for preset in self
-        )
+        return ', '.join(self)
 
     @classmethod
     def wob_json_key(cls) -> str:

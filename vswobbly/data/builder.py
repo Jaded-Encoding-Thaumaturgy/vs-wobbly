@@ -5,14 +5,14 @@ from typing import Any
 from vstools import (FieldBased, FieldBasedT, FileNotExistsError,
                      FileWasNotFoundError, SPath, SPathLike)
 
-from ..components import (CombedFrames, CustomList, CustomLists,
-                          CustomPresetPosition, Decimations, FieldMatches,
-                          FreezeFrame, FreezeFrames, InterlacedFade,
-                          InterlacedFades, OrphanFrames, Preset, Presets,
+from ..components import (CombedFrames, CustomList, CustomLists, Decimations,
+                          FieldMatches, FreezeFrame, FreezeFrames,
+                          InterlacedFade, InterlacedFades, Preset, Presets,
                           Section, Sections, WobblyVideo)
 from ..data.parse import WobblyParser
 from ..data.validation import WobblyValidator
 from ..exceptions import NotAWobblyFileError, WobblyParseError
+from ..types import FilteringPositionEnum
 from ..util import to_snake_case
 
 __all__ = [
@@ -170,7 +170,10 @@ class WobblyBuilder:
         all_presets = self._data.get('presets', [])
 
         return {
-            p['name']: Preset(**self._to_snake_case(p))
+            p['name']: Preset(
+                name=self._to_snake_case(p['name']),
+                **{k: v for k, v in p.items() if k != 'name'}
+            )
             for p in all_presets
         }
 
@@ -198,7 +201,7 @@ class WobblyBuilder:
             self._data['custom lists'].append({
                 'name': f"section_{start}_{end}_{preset.name}",
                 'preset': preset,
-                'position': CustomPresetPosition.PRE_DECIMATION,
+                'position': FilteringPositionEnum.PRE_DECIMATE,
                 'frames': [(start, end)]
             })
 
@@ -245,8 +248,11 @@ class WobblyBuilder:
 
         return [item_class(x) for x in data]
 
-    def _to_snake_case(self, item: dict) -> dict:
+    def _to_snake_case(self, item: dict[Any, Any] | str) -> dict[Any, Any] | str:
         """Convert dictionary keys from space-separated to snake_case."""
+
+        if isinstance(item, str):
+            return to_snake_case(item)
 
         return {
             to_snake_case(k) if isinstance(v, str) else k: to_snake_case(v) if isinstance(v, str) else v
@@ -255,6 +261,8 @@ class WobblyBuilder:
 
     def _build_orphan_frames(self, parsed_data: dict) -> None:
         """Add orphan frames if both sections and field matches exist."""
+
+        from ..components import OrphanFrames
 
         sections = parsed_data.get(Sections.wob_json_key())
         matches = parsed_data.get('field_matches')

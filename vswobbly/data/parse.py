@@ -1,11 +1,10 @@
 from dataclasses import dataclass, field
 from typing import Any, Self
+from ..components import (CombedFrames, CustomLists, Decimations,
+                            FieldMatches, FreezeFrames, InterlacedFades,
+                            OrphanFrames, Presets, Sections, WobblyVideo)
 
 from vstools import FieldBased, FieldBasedT, SPath, SPathLike, vs
-
-from ..components import (CombedFrames, CustomLists, Decimations, FieldMatches,
-                          FreezeFrames, InterlacedFades, OrphanFrames, Presets,
-                          Sections, WobblyVideo)
 
 __all__ = [
     'WobblyParser',
@@ -55,16 +54,12 @@ class WobblyParser:
     """List of orphan frames."""
 
     @classmethod
-    def from_json(cls, file_path: SPathLike) -> Self:
-        """Load the wobbly file as a JSON object."""
+    def from_file(cls, file_path: SPathLike) -> Self:
+        """Parse a wobbly object from a wobbly file."""
 
         from .builder import WobblyBuilder
 
         return WobblyBuilder(file_path).build()
-
-    @staticmethod
-    def _parse_wob_data(data: dict[str, Any] | None = None) -> dict[str, Any]:
-        """Parse the wobbly data."""
 
     @staticmethod
     def _get_video_data(wob_file: SPath, data: dict[str, Any]) -> WobblyVideo:

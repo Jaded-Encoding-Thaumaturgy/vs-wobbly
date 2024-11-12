@@ -1,4 +1,4 @@
-from vstools import fallback
+from vstools import fallback, vs
 
 from ..exceptions import NegativeFrameError
 from ..util import deduplicate_list
@@ -33,3 +33,13 @@ class Decimations(list[int]):
             return self[self.index(frame)]
         except ValueError:
             return None
+
+    def apply(self, clip: vs.VideoNode) -> vs.VideoNode:
+        """Apply the decimations to the clip."""
+
+        if len(self) == 0:
+            return clip
+
+        dec = clip.std.DeleteFrames(self)
+
+        return dec.std.AssumeFPS(fpsnum=24000, fpsden=1001)
