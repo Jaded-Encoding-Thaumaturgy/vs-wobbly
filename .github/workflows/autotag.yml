@@ -1,6 +1,12 @@
 name: Check and create tag
 
 on:
+  workflow_run:
+    workflows: ["Lint Python code with Ruff"]
+    types:
+      - completed
+    branches:
+      - master
   push:
     branches:
       - master
@@ -32,7 +38,7 @@ jobs:
         with:
           github-token: ${{ secrets.AUTOTAG_TOKEN }}
           script: |
-            github.git.createRef({
+            github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: `refs/tags/${process.env.CURR_VER}`,
