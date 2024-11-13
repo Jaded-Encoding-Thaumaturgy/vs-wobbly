@@ -37,16 +37,7 @@ class CustomList:
             kwargs['frames'] = self._frames_to_ranges(kwargs['frames'])
 
         self.name = kwargs.get('name', '')
-
-        preset_data = kwargs.get('preset', '')
-
-        if isinstance(preset_data, dict):
-            self.preset = Preset(**preset_data)
-        elif isinstance(preset_data, Preset):
-            self.preset = preset_data
-        else:
-            raise CustomValueError('Invalid preset data type', self)
-
+        self.preset = kwargs.get('preset', '')
         self.position = FilteringPositionEnum(kwargs.get('position', 'pre decimation'))
         self.frames = kwargs.get('frames', [])
 
