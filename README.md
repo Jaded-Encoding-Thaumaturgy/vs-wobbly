@@ -6,7 +6,6 @@
     <a href="https://github.com/Jaded-Encoding-Thaumaturgy/vs-wobbly/commits/master"><img alt="GitHub commits since tagged version" src="https://img.shields.io/github/commits-since/Jaded-Encoding-Thaumaturgy/vs-wobbly/latest"></a>
     <a href="https://github.com/Jaded-Encoding-Thaumaturgy/vs-wobbly/blob/master/LICENSE"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/vswobbly"></a>
     <a href="https://discord.gg/XTpc6Fa9eB"><img alt="Discord" src="https://img.shields.io/discord/856381934052704266?label=discord"></a>
-    <img alt="downloads" src="https://static.pepy.tech/personalized-badge/vswobbly?period=total&units=international_system&left_color=grey&right_color=blue&left_text=downloads">
 </p>
 
 A collection of VapourSynth functions for parsing and filtering wobbly files.
@@ -65,7 +64,7 @@ from vswobbly import WobblyProcessor, DecombVinverseStrategy
 
 wob = WobblyProcessor.from_file(
     'C:/path/to/wobbly.wob',
-    combed_frames_strategy=DecombVinverseStrategy()
+    strategies=[DecombVinverseStrategy()]
 )
 
 clip = wob.apply()
@@ -79,3 +78,6 @@ and allow users to handle these problems however they see fit.
 To implement your own strategy,
 create a class and inherit from [AbstractProcessingStrategy](./vswobbly/process/strategies/abstract.py).
 Refer to the existing strategies and the docstrings of the abstract class for examples.
+
+Note: For orphan field handling to be handled correctly,
+the strategy *must* have 'Orphan' in its name.

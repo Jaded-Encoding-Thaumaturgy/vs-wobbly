@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Self
 
 from vstools import SPathLike, FieldBased, vs
@@ -24,49 +24,41 @@ class WobblyProcessor(ProcessingStrategyManager):
     """The parsed wobbly data."""
 
     # Strategies for handling certain types of issues.
-    prefilter_strategy: AbstractProcessingStrategy | None = None
-    """The strategy to use before any other processing."""
-
-    combed_frames_strategy: AbstractProcessingStrategy | None = None
-    """The strategy to use for combed frames."""
-
-    interlaced_fade_frames_strategy: AbstractProcessingStrategy | None = None
-    """The strategy to use for interlaced fade frames."""
-
-    orphan_frames_strategy: AbstractProcessingStrategy | None = None
-    """The strategy to use for orphan frames."""
+    strategies: list[AbstractProcessingStrategy] = field(default_factory=list)
+    """
+    The strategies to use during specific processing steps.
+    This can be strategies like combed-frame handling, how to deinterlace orphan fields, etc.
+    See the `AbstractProcessingStrategy` class for more information.
+    """
 
     def __init__(
         self,
         parser: WobblyParser,
-        work_clip: vs.VideoNode,
-        prefilter_strategy: AbstractProcessingStrategy | None = None,
-        combed_frames_strategy: AbstractProcessingStrategy | None = None,
-        interlaced_fade_frames_strategy: AbstractProcessingStrategy | None = None,
-        orphan_frames_strategy: AbstractProcessingStrategy | None = None
+        work_clip: vs.VideoNode | None = None,
+        strategies: list[AbstractProcessingStrategy] = []
     ) -> None:
+        if work_clip is None:
+            work_clip = parser.work_clip
+
         self.work_clip = work_clip
         self.parser = parser
-        self.prefilter_strategy = prefilter_strategy
-        self.combed_frames_strategy = combed_frames_strategy
-        self.interlaced_fade_frames_strategy = interlaced_fade_frames_strategy
-        self.orphan_frames_strategy = orphan_frames_strategy
+        self.strategies = strategies
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.strategies, list):
+            self.strategies = [self.strategies]
 
     @classmethod
     def from_file(
         cls,
         wobbly_filepath: SPathLike,
-        prefilter_strategy: AbstractProcessingStrategy | None = None,
-        combed_frames_strategy: AbstractProcessingStrategy | None = None,
-        interlaced_fade_frames_strategy: AbstractProcessingStrategy | None = None,
-        orphan_frames_strategy: AbstractProcessingStrategy | None = None,
+        strategies: list[AbstractProcessingStrategy] | None = None,
     ) -> Self:
         """Create a processor from a wobbly file."""
 
         return cls(
             WobblyParser.from_file(wobbly_filepath),
-            prefilter_strategy, combed_frames_strategy,
-            interlaced_fade_frames_strategy, orphan_frames_strategy,
+            strategies=strategies,
         )
 
     def apply(self, clip: vs.VideoNode | None = None) -> vs.VideoNode:
@@ -85,14 +77,14 @@ class WobblyProcessor(ProcessingStrategyManager):
         """Initialize the process."""
 
         self.proc_clip = clip or self.parser.work_clip
-        self.init_strategies(self.parser)
+        self.init_strategies(self.parser, self.strategies)
 
     def apply_post_source(self) -> None:
         """Post-source filtering, followed by field matching."""
 
         self.apply_strategies_of_position(FilteringPositionEnum.POST_SOURCE)
 
-        if self.orphan_frames_strategy is not None:
+        if any('orphan' in strategy.__class__.__name__.lower() for strategy in self.strategies):
             self.parser.field_matches.set_orphans_to_combed_matches(self.parser.orphan_frames)
 
         self.proc_clip = self.parser.sections.set_props(self.proc_clip, wobbly_parsed=self.parser)
