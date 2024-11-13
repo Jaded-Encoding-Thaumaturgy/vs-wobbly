@@ -6,7 +6,6 @@ from vstools import (
     replace_ranges, vs
 )
 
-from .presets import Preset
 from ..types import FilteringPositionEnum
 from .types import PresetProtocol, SectionsProtocol
 
