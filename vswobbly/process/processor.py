@@ -84,13 +84,14 @@ class WobblyProcessor(ProcessingStrategyManager):
 
         self.apply_strategies_of_position(FilteringPositionEnum.POST_SOURCE)
 
-        if any('orphan' in strategy.__class__.__name__.lower() for strategy in self.strategies):
+        if any('orphan' in str(strategy).lower() for strategy in self.strategies):
             self.parser.field_matches.set_orphans_to_combed_matches(self.parser.orphan_frames)
 
         self.proc_clip = self.parser.sections.set_props(self.proc_clip, wobbly_parsed=self.parser)
-        self.proc_clip = self.parser.field_matches.apply(self.proc_clip)
         self.proc_clip = self.parser.combed_frames.set_props(self.proc_clip)
         self.proc_clip = self.parser.interlaced_fades.set_props(self.proc_clip)
+        self.proc_clip = self.parser.orphan_frames.set_props(self.proc_clip)
+        self.proc_clip = self.parser.field_matches.apply(self.proc_clip)
 
     def apply_post_field_match(self) -> None:
         """Post-field matching filtering."""

@@ -112,16 +112,31 @@ class OrphanFrames(list[OrphanFrame]):
         except StopIteration:
             return None
 
-    def find_matches(self, match: ValidMatchT) -> list[OrphanFrame]:
+    def find_matches(self, match: ValidMatchT) -> Self:
         """Find all frames with a specific match."""
 
-        return [f for f in self if f.match == match]
+        return OrphanFrames([f for f in self if f.match == match])
 
     def set_props(self, clip: vs.VideoNode) -> vs.VideoNode:
         """Set the orphan frame properties on the clip."""
 
-        return replace_ranges(
-            clip.std.SetFrameProps(WobblyOrphanFrame=False),
-            clip.std.SetFrameProps(WobblyOrphanFrame=True),
-            self
-        )
+        if not self:
+            return clip
+
+        for match in ValidMatchT.__args__:  # type: ignore
+            if match == 'c':
+                continue
+
+            clip = replace_ranges(
+                clip.std.SetFrameProps(WobblyOrphanFrame=False),
+                clip.std.SetFrameProps(WobblyOrphanFrame=match),
+                self.find_matches(match).frames
+            )
+
+        return clip
+
+    @property
+    def frames(self) -> list[int]:
+        """Get all frames in the list."""
+
+        return [frame.frame for frame in self]
