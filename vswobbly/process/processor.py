@@ -87,6 +87,7 @@ class WobblyProcessor(ProcessingStrategyManager):
         if any('orphan' in str(strategy).lower() for strategy in self.strategies):
             self.parser.field_matches.set_orphans_to_combed_matches(self.parser.orphan_frames)
 
+        self.parser.sections.set_patterns(self.parser.field_matches)
         self.proc_clip = self.parser.sections.set_props(self.proc_clip, wobbly_parsed=self.parser)
         self.proc_clip = self.parser.combed_frames.set_props(self.proc_clip)
         self.proc_clip = self.parser.interlaced_fades.set_props(self.proc_clip)

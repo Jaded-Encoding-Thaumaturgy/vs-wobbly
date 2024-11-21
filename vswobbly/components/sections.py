@@ -1,11 +1,13 @@
 from dataclasses import dataclass, field
 from math import ceil
+from typing import Literal
 
 from vstools import Keyframes, vs
 
 from ..exceptions import NegativeFrameError
 from .decimations import Decimations
 from .types import PresetProtocol, SectionProtocol
+from .matches import FieldMatches
 
 __all__ = [
     'Section',
@@ -23,8 +25,16 @@ class Section(SectionProtocol):
     presets: list[PresetProtocol] = field(default_factory=list)
     """The presets used for this section."""
 
+    dominant_pattern: Literal[0, 1, 2, 3, 4, -1] = -1
+    """The dominant pattern for this section. -1 means unknown."""
+
     def __post_init__(self):
         NegativeFrameError.check(self, self.start)
+
+    def set_pattern(self, pattern: Literal[0, 1, 2, 3, 4]):
+        """Set the dominant pattern for this section."""
+
+        self.dominant_pattern = pattern
 
 
 class Sections(list[Section]):
@@ -99,5 +109,35 @@ class Sections(list[Section]):
             else len(split_decimations[sd_idx]) for n in range(clip.num_frames)
         ]
 
-        return clip.std.FrameEval(lambda n: fps_clips[indices[n]])
+        # Set pattern for each frame based on which section it falls into
+        pattern_props = []
 
+        for n in range(clip.num_frames):
+            section_idx = 0
+
+            for i, _ in enumerate(self):
+                if i < len(self) - 1 and n >= self[i + 1].start:
+                    continue
+
+                section_idx = i
+                break
+
+            pattern_props.append(self[section_idx].dominant_pattern)
+
+        return clip.std.FrameEval(
+            lambda n: fps_clips[indices[n]].std.SetFrameProps(
+                WobblyPattern=pattern_props[n]
+            )
+        )
+
+    def set_patterns(self, matches: FieldMatches) -> None:
+        """Set the dominant patterns for all sections based on the matches."""
+
+        import warnings
+
+        warnings.warn(
+            'Sections.set_patterns: This method is not yet implemented and will be implemented in a future version.',
+            DeprecationWarning
+        )
+
+        return
