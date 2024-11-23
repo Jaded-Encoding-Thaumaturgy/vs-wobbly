@@ -45,6 +45,17 @@ class FreezeFrames(list[FreezeFrame]):
         NegativeFrameError.check(self.__class__, [freeze.last for freeze in fallback(self, [])])
         NegativeFrameError.check(self.__class__, [freeze.replacement for freeze in fallback(self, [])])
 
+        wrong_ranges = []
+
+        for start, end in zip(self.first, self.last):
+            if start > end:
+                wrong_ranges.append((start, end))
+
+        if wrong_ranges:
+            raise CustomValueError(
+                f'First frame must start before the last frame! ({wrong_ranges})', self
+            )
+
     def apply(self, clip: vs.VideoNode) -> vs.VideoNode:
         """Apply the freeze frames to the clip."""
 
@@ -53,8 +64,13 @@ class FreezeFrames(list[FreezeFrame]):
 
         # I realise this is slower! See _better_apply for a faster WIP implementation.
         for freeze in self:
-            frozen = clip.std.FreezeFrames(freeze.first, freeze.last, freeze.replacement)
-            frozen = frozen.std.SetFrameProps(WobblyFreeze=[freeze.first, freeze.last, freeze.replacement])
+            try:
+                frozen = clip.std.FreezeFrames(freeze.first, freeze.last, freeze.replacement)
+                frozen = frozen.std.SetFrameProps(WobblyFreeze=[freeze.first, freeze.last, freeze.replacement])
+            except vs.Error as e:
+                raise CustomValueError(
+                    f'Failed to apply freeze frames ({freeze}): {e}', self
+                ) from e
 
             clip = replace_ranges(clip, frozen, [(freeze.first, freeze.last)])
 
