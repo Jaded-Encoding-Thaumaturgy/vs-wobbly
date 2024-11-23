@@ -108,8 +108,8 @@ class Preset:
 class Presets(list[Preset]):
     """Class for holding a list of presets."""
 
-    def __init__(self, presets: list[Preset]) -> None:
-        super().__init__(presets or [])
+    def __init__(self, presets: list[Preset] = []) -> None:
+        super().__init__(presets)
 
     def __str__(self) -> str:
         return ', '.join(self)
