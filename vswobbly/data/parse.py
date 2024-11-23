@@ -54,6 +54,37 @@ class WobblyParser:
     orphan_frames: OrphanFrames = field(default_factory=OrphanFrames)
     """List of orphan frames."""
 
+    def __init__(
+        self,
+        file_path: SPath,
+        work_clip: vs.VideoNode,
+        video_data: WobblyVideo,
+        field_order: FieldBasedT,
+        sections: Sections | None = None,
+        field_matches: FieldMatches | None = None,
+        decimations: Decimations | None = None,
+        presets: Presets | None = None,
+        custom_lists: CustomLists | None = None,
+        freeze_frames: FreezeFrames | None = None,
+        interlaced_fades: InterlacedFades | None = None,
+        combed_frames: CombedFrames | None = None,
+        orphan_frames: OrphanFrames | None = None,
+    ) -> None:
+        self.file_path = file_path
+        self.work_clip = work_clip
+        self.video_data = video_data
+        self.field_order = field_order
+
+        self.sections = sections or Sections()
+        self.field_matches = field_matches or FieldMatches()
+        self.decimations = decimations or Decimations()
+        self.presets = presets or Presets()
+        self.custom_lists = custom_lists or CustomLists()
+        self.freeze_frames = freeze_frames or FreezeFrames()
+        self.interlaced_fades = interlaced_fades or InterlacedFades()
+        self.combed_frames = combed_frames or CombedFrames()
+        self.orphan_frames = orphan_frames or OrphanFrames()
+
     @classmethod
     def from_file(cls, file_path: SPathLike) -> Self:
         """Parse a wobbly object from a wobbly file."""
