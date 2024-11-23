@@ -84,7 +84,7 @@ class WobblyProcessor(ProcessingStrategyManager):
 
         self.apply_strategies_of_position(FilteringPositionEnum.POST_SOURCE)
 
-        if any('orphan' in str(strategy).lower() for strategy in self.strategies):
+        if any('orphan' in str(strategy).lower() for strategy in (self.strategies or [])):
             self.parser.field_matches.set_orphans_to_combed_matches(self.parser.orphan_frames)
 
         self.parser.sections.set_patterns(self.parser.field_matches)
