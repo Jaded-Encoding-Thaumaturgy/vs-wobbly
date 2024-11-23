@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Self
+from typing import Iterable, Any, Self
 
 from vstools import (
     CustomRuntimeError, CustomValueError, FrameRangesN,
@@ -59,12 +59,30 @@ class CustomList:
         invalid = []
 
         for frame in frames:
-            if isinstance(frame, int):
-                ranges.append((frame, frame))
-            elif len(frame) == 2:
-                ranges.append(frame)
-            else:
+            if not isinstance(frame, (Iterable, int)):
                 invalid.append(frame)
+                continue
+
+            if isinstance(frame, int):
+                ranges.append(frame)
+                continue
+
+            if not isinstance(frame, tuple):
+                frame = tuple(frame)
+
+            if len(frame) != 2:
+                invalid.append(frame)
+                continue
+
+            if frame[0] == frame[1]:
+                ranges.append(frame[0])
+                continue
+
+            if frame[0] > frame[1]:
+                invalid.append(frame)
+                continue
+
+            ranges.append(frame)
 
         if invalid:
             raise CustomValueError(f'Invalid frame ranges in custom list: {invalid}', CustomList)
@@ -83,14 +101,14 @@ class CustomList:
                 self.apply
             )
 
-        for start, end in self._frames_to_ranges(self.frames):
+        for _range in self._frames_to_ranges(self.frames):
             range_flt = flt.std.SetFrameProps(
                 WobblyPreset=str(self.preset),
                 WobblyPresetPosition=self.position.value,
-                WobblyPresetFrames=[start, end]
+                WobblyPresetFrames=_range
             )
 
-            clip = replace_ranges(clip, range_flt, [(start, end)])
+            clip = replace_ranges(clip, range_flt, _range)
 
         return clip
 
