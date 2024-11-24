@@ -77,6 +77,10 @@ class WobblyProcessor(ProcessingStrategyManager):
         """Initialize the process."""
 
         self.proc_clip = clip or self.parser.work_clip
+
+        if self.parser.video_data.trim:
+            self.proc_clip = self.proc_clip.std.Trim(self.parser.video_data.trim[0], self.parser.video_data.trim[1])
+
         self.init_strategies(self.parser, self.strategies)
 
     def apply_post_source(self) -> None:

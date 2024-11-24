@@ -77,6 +77,3 @@ class WobblyVideo:
             self.work_clip = self.source_filter(src_file)
         except Exception as e:
             raise CustomValueError(f'Error indexing source clip: {e}', self.__class__)
-
-        if self.trim:
-            self.work_clip = self.work_clip.std.Trim(self.trim[0], self.trim[1])
