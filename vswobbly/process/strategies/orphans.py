@@ -67,8 +67,8 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
 
         qtgmc_kwargs = self._qtgmc_kwargs | dict(FPSDivisor=1, TFF=wobbly_parsed.field_based.is_tff)
 
-        deint_n = self._qtgmc(QTGMC, clip, not wobbly_parsed.field_based.field, **qtgmc_kwargs)
-        deint_b = self._qtgmc(QTGMC, clip, wobbly_parsed.field_based.field, **qtgmc_kwargs)
+        deint = self._qtgmc(QTGMC, clip, not wobbly_parsed.field_based.field, **qtgmc_kwargs)
+        deint_n, deint_b = deint[::2], deint[1::2]
 
         orphan_n, orphan_b = (wobbly_parsed.orphan_frames.find_matches(m) for m in ('n', 'b'))
 
