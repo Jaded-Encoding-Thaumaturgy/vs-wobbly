@@ -1,6 +1,6 @@
 """Wobbly Vapoursynth Functions."""
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 __author__ = 'LightArrowsEXE <LightArrowsReboot@gmail.com>'
 __maintainer__ = __author__
