@@ -108,7 +108,24 @@ class CustomList:
                 WobblyPresetFrames=_range
             )
 
-            clip = replace_ranges(clip, range_flt, _range)
+            if isinstance(_range, tuple) and _range[1] >= clip.num_frames - 1:
+                _range = (_range[0], clip.num_frames - 2)
+
+            try:
+                clip = replace_ranges(clip, range_flt, _range)
+            except vs.Error as e:
+                if 'invalid last frame' in str(e):
+                    clip = replace_ranges(clip, range_flt, (_range[0], clip.num_frames - 2))
+
+                raise CustomRuntimeError(
+                    f'Error applying custom list \'{self.name}\' (range: {_range}): {e}',
+                    self.apply
+                )
+            except Exception as e:
+                raise CustomRuntimeError(
+                    f'Error applying custom list \'{self.name}\' (range: {_range}): {e}',
+                    self.apply
+                )
 
         return clip
 
