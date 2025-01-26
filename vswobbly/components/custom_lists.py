@@ -97,7 +97,7 @@ class CustomList:
         except Exception as e:
             raise CustomRuntimeError(
                 f'Error applying preset of custom list \'{self.name}\': '
-                f'Invalid Python code in preset contents. Original error: {e}',
+                f'Invalid Python code in preset contents.\nOriginal error: {e}',
                 self.apply
             )
 
