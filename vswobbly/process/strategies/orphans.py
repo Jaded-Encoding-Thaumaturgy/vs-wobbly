@@ -65,15 +65,17 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
         except ImportError:
             raise DependencyNotFoundError(self.apply, 'havsfunc')
 
-        qtgmc_kwargs = self._qtgmc_kwargs | dict(FPSDivisor=1, TFF=wobbly_parsed.field_based.is_tff)
+        clip = clip.std.SetFrameProps(wobbly_orphan_deint=False)
 
-        deint = self._qtgmc(QTGMC, clip, not wobbly_parsed.field_based.field, **qtgmc_kwargs)
-        deint_n, deint_b = deint[::2], deint[1::2]
+        qtgmc_kwargs = self._qtgmc_kwargs() | dict(TFF=wobbly_parsed.field_order.is_tff)
+        qtgmc_kwargs.pop('FPSDivisor', None)
+        qtgmc_kwargs.pop('InputType', None)
 
-        orphan_n, orphan_b = (wobbly_parsed.orphan_frames.find_matches(m) for m in ('n', 'b'))
+        deint = self._qtgmc(QTGMC, clip, **qtgmc_kwargs)
+        deint_b = deint[wobbly_parsed.field_order.is_tff::2]
 
-        deint = replace_ranges(clip, deint_n, orphan_n)
-        deint = replace_ranges(deint, deint_b, orphan_b)
+        orphans_b = wobbly_parsed.orphan_frames.find_matches('b')
+        deint = replace_ranges(deint, deint_b, [orphan.frame for orphan in orphans_b])
 
         return deint
 
@@ -83,10 +85,10 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
 
         return FilteringPositionEnum.PRE_DECIMATE
 
-    def _qtgmc(self, qtgmc: VSFunctionKwArgs, clip: vs.VideoNode, slice_field: bool, **kwargs: Any) -> vs.VideoNode:
+    def _qtgmc(self, qtgmc: VSFunctionKwArgs, clip: vs.VideoNode, **kwargs: Any) -> vs.VideoNode:
         """Apply QTGMC to the given clip."""
 
-        return qtgmc(clip, **kwargs)[slice_field::2]
+        return qtgmc(clip, **kwargs).std.SetFrameProps(wobbly_orphan_deint=True)
 
     def _qtgmc_kwargs(self) -> dict[str, int | bool | str]:
         """QTGMC kwargs."""
