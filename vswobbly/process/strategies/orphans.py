@@ -74,8 +74,10 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
         deint = self._qtgmc(QTGMC, clip, **qtgmc_kwargs)
         deint_b = deint[wobbly_parsed.field_order.is_tff::2]
 
-        orphans_b = wobbly_parsed.orphan_frames.find_matches('b')
-        deint = replace_ranges(deint, deint_b, [orphan.frame for orphan in orphans_b])
+        deint = replace_ranges(
+            clip, deint_b,
+            [orphan.frame for orphan in wobbly_parsed.orphan_frames.find_matches('b')]
+        )
 
         return deint
 
