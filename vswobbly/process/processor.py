@@ -88,6 +88,7 @@ class WobblyProcessor(ProcessingStrategyManager):
 
         self.apply_strategies_of_position(FilteringPositionEnum.POST_SOURCE)
 
+        # This must be run here to ensure the matches are set to 'c' correctly prior to deinterlacing.
         if any('orphan' in str(strategy).lower() for strategy in (self.strategies or [])):
             self.parser.field_matches.set_orphans_to_combed_matches(self.parser.orphan_frames)
 
