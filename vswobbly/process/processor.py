@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Self
 
-from vstools import SPathLike, FieldBased, vs
+from vstools import FieldBased, SPathLike, vs
+
 from vswobbly.data.parse import WobblyParser
 from vswobbly.types import FilteringPositionEnum
 
@@ -79,7 +80,10 @@ class WobblyProcessor(ProcessingStrategyManager):
         self.proc_clip = clip or self.parser.work_clip
 
         if self.parser.video_data.trim:
-            self.proc_clip = self.proc_clip.std.Trim(self.parser.video_data.trim[0], self.parser.video_data.trim[1])
+            self.proc_clip = self.proc_clip.std.Trim(
+                self.parser.video_data.trim[0],
+                self.parser.video_data.trim[1],
+            )
 
         self.init_strategies(self.parser, self.strategies)
 
@@ -90,7 +94,10 @@ class WobblyProcessor(ProcessingStrategyManager):
 
         # This must be run here to ensure the matches are set to 'c' correctly prior to deinterlacing.
         if any('orphan' in str(strategy).lower() for strategy in (self.strategies or [])):
-            self.parser.field_matches.set_orphans_to_combed_matches(self.parser.orphan_frames)
+            self.parser.field_matches.set_orphans_to_combed_matches(
+                self.parser.orphan_frames,
+                self.proc_clip,
+            )
 
         self.parser.sections.set_patterns(self.parser.field_matches)
         self.proc_clip = self.parser.sections.set_props(self.proc_clip, wobbly_parsed=self.parser)
