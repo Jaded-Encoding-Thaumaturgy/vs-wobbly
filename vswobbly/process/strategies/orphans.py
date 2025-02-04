@@ -1,6 +1,7 @@
 from typing import Any
 
-from vstools import VSFunctionKwArgs, DependencyNotFoundError, replace_ranges, vs, CustomValueError
+from vstools import (CustomValueError, DependencyNotFoundError,
+                     VSFunctionKwArgs, replace_ranges, vs)
 
 from vswobbly.types import FilteringPositionEnum
 
@@ -67,19 +68,35 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
 
         clip = clip.std.SetFrameProps(wobbly_orphan_deint=False)
 
-        qtgmc_kwargs = self._qtgmc_kwargs() | dict(TFF=wobbly_parsed.field_order.is_tff)
-        qtgmc_kwargs.pop('FPSDivisor', None)
-        qtgmc_kwargs.pop('InputType', None)
-
-        deint = self._qtgmc(QTGMC, clip, **qtgmc_kwargs)
-        deint_b = deint[wobbly_parsed.field_order.is_tff::2]
-
-        deint = replace_ranges(
-            clip, deint_b,
-            [orphan.frame for orphan in wobbly_parsed.orphan_frames.find_matches('b')]
+        qtgmc_kwargs = (
+            self._qtgmc_kwargs()
+            | dict(
+                TFF=wobbly_parsed.field_order.is_tff,
+                FPSDivisor=1,
+                InputType=0,
+            )
         )
 
-        return deint
+        deint_clip = self._qtgmc(QTGMC, clip, **(qtgmc_kwargs | dict()))
+        deint_clip = deint_clip[wobbly_parsed.field_order.is_tff::2]
+
+        n_deint_frames = [
+            f.frame for f in wobbly_parsed.orphan_frames.find_matches('n')
+            if wobbly_parsed.field_matches[f.frame] == 'c'
+        ]
+
+        b_deint_frames = [
+            f.frame for f in wobbly_parsed.orphan_frames.find_matches('b')
+            if wobbly_parsed.field_matches[f.frame] == 'c'
+        ]
+
+        if not n_deint_frames and not b_deint_frames:
+            return clip
+
+        clip = replace_ranges(clip, deint_clip.std.SetFrameProps(wobbly_orphan_deint_field='n'), n_deint_frames)
+        clip = replace_ranges(clip, deint_clip.std.SetFrameProps(wobbly_orphan_deint_field='b'), b_deint_frames)
+
+        return clip
 
     @property
     def position(self) -> FilteringPositionEnum:
@@ -96,8 +113,7 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
         """QTGMC kwargs."""
 
         return dict(
-            TR0=2, TR1=2, TR2=2, Sharpness=0, Lossless=1, InputType=0,
-            Rep0=3, Rep1=3, Rep2=2, SourceMatch=3, EdiMode='EEDI3+NNEDI3', EdiQual=2,
-            Sbb=3, SubPel=4, SubPelInterp=2, opencl=False, RefineMotion=True,
-            Preset='Placebo', MatchPreset='Placebo', MatchPreset2='Placebo'
+            TR0=2, TR1=2, TR2=2, Lossless=2, EdiMode='EEDI3+NNEDI3', EdiQual=2, Rep0=4, Rep1=4, Rep2=3,
+            SourceMatch=3, MatchPreset='Placebo', MatchPreset2='Placebo', Sbb=3, SubPel=4, SubPelInterp=2,
+            RefineMotion=True, Preset='Placebo', TrueMotion=True, GlobalMotion=True, opencl=False
         )
