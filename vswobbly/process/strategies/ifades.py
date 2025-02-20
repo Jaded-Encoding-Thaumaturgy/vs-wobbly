@@ -1,7 +1,7 @@
 from typing import Any
 
 from vstools import vs, replace_ranges
-from vsdeinterlace import fix_interlaced_fades
+from vsdeinterlace import FixInterlacedFades
 
 from ...types import FilteringPositionEnum
 
@@ -69,7 +69,7 @@ class AverageFixInterlacedFadesStrategy(AbstractProcessingStrategy):
 
         frame_groups = self._frame_grouper.group_frames_into_ranges(clip, wobbly_parsed.fade_frames, 5)
 
-        return replace_ranges(clip, fix_interlaced_fades.Average(clip), frame_groups)
+        return replace_ranges(clip, FixInterlacedFades.Average(clip), frame_groups)
 
     @property
     def position(self) -> FilteringPositionEnum:
@@ -103,7 +103,7 @@ class AdaptiveFixInterlacedFadesStrategy(AbstractProcessingStrategy):
 
         # TODO: Add fade detection and adaptive selection methods. For now, just use Average.
 
-        return replace_ranges(clip, fix_interlaced_fades.Average(clip), frame_groups)
+        return replace_ranges(clip, FixInterlacedFades.Average(clip), frame_groups)
 
     @property
     def position(self) -> FilteringPositionEnum:
