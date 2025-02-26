@@ -42,4 +42,4 @@ class Decimations(list[int]):
 
         dec = clip.std.DeleteFrames(self)
 
-        return dec.std.AssumeFPS(fpsnum=24000, fpsden=1001)
+        return dec
