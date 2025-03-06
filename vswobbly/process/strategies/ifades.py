@@ -1,11 +1,10 @@
 from typing import Any
 
-from vstools import vs, replace_ranges
 from vsdeinterlace import FixInterlacedFades
-
-from ...types import FilteringPositionEnum
+from vstools import CustomTypeError, replace_ranges, vs
 
 from ...data.parse import WobblyParser
+from ...types import FilteringPositionEnum
 from .abstract import AbstractProcessingStrategy
 
 __all__ = [
@@ -26,6 +25,17 @@ class _FrameRangeGrouper:
 
         :return:           List of (start, end) frame ranges
         """
+
+        frame_nums = [
+            x.frame if not isinstance(x, int) and hasattr(x, 'frame') and isinstance(x.frame, int) else x
+            for x in frame_nums
+        ]
+
+        if invalid_frames := [x for x in frame_nums if not isinstance(x, int)]:
+            raise CustomTypeError(
+                'All frame numbers must be integers or have an integer frame attribute!',
+                self.group_frames_into_ranges, invalid_frames
+            )
 
         frame_nums = sorted(frame_nums)
         last_frame = clip.num_frames - 1
@@ -67,7 +77,7 @@ class AverageFixInterlacedFadesStrategy(AbstractProcessingStrategy):
         :return:                Clip with the processing applied to the selected frames.
         """
 
-        frame_groups = self._frame_grouper.group_frames_into_ranges(clip, wobbly_parsed.fade_frames, 5)
+        frame_groups = self._frame_grouper.group_frames_into_ranges(clip, wobbly_parsed.interlaced_fades, 5)
 
         return replace_ranges(clip, FixInterlacedFades.Average(clip), frame_groups)
 
@@ -99,7 +109,7 @@ class AdaptiveFixInterlacedFadesStrategy(AbstractProcessingStrategy):
         :return:                Clip with the processing applied to the selected frames.
         """
 
-        frame_groups = self._frame_grouper.group_frames_into_ranges(clip, wobbly_parsed.fade_frames, 5)
+        frame_groups = self._frame_grouper.group_frames_into_ranges(clip, wobbly_parsed.interlaced_fades, 5)
 
         # TODO: Add fade detection and adaptive selection methods. For now, just use Average.
 
