@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from math import ceil
 from typing import Literal
+from bisect import bisect_left
 
 from vstools import Keyframes, vs
 
@@ -57,17 +58,21 @@ class Sections(list[Section]):
 
         :param decimations:     The decimations to account for.
 
-        :return:                A keyframes object representing the section start frames
-                                adjusted for decimations.
+        :return:                A keyframes object representing the section start frames adjusted for decimations.
         """
 
-        keyframes = []
+        if not self:
+            return Keyframes([])
 
-        for section in self:
-            decimation_count = sum(1 for d in decimations if d < section.start)
-            adjusted_start = section.start - decimation_count
+        if not decimations:
+            return Keyframes([section.start for section in self])
 
-            keyframes.append(adjusted_start)
+        sorted_decimations = sorted(decimations)
+
+        keyframes = [
+            section.start - bisect_left(sorted_decimations, section.start)
+            for section in self
+        ]
 
         return Keyframes(keyframes)
 
