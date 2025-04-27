@@ -116,11 +116,11 @@ class CustomList:
             except vs.Error as e:
                 if 'invalid last frame' in str(e):
                     clip = replace_ranges(clip, range_flt, (_range[0], clip.num_frames - 1))
-
-                raise CustomRuntimeError(
-                    f'Error applying custom list \'{self.name}\' (range: {_range}): {e}',
-                    self.apply
-                )
+                else:
+                    raise CustomRuntimeError(
+                        f'Error applying custom list \'{self.name}\' (range: {_range}): {e}',
+                        self.apply
+                    )
             except Exception as e:
                 raise CustomRuntimeError(
                     f'Error applying custom list \'{self.name}\' (range: {_range}): {e}',
