@@ -9,7 +9,7 @@ __all__ = [
 
 
 class Decimations(list[int]):
-    """Class for holding decimations."""
+    """Class for holding a sorted list of decimated frame indices."""
 
     def __init__(self, decimations: list[int] | None = None) -> None:
         super().__init__(decimations or [])

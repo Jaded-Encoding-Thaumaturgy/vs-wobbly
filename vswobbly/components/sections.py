@@ -67,10 +67,8 @@ class Sections(list[Section]):
         if not decimations:
             return Keyframes([section.start for section in self])
 
-        sorted_decimations = sorted(decimations)
-
         keyframes = [
-            section.start - bisect_left(sorted_decimations, section.start)
+            section.start - bisect_left(decimations, section.start)
             for section in self
         ]
 
