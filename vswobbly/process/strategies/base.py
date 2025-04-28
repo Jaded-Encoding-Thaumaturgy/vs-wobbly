@@ -3,6 +3,7 @@ from ...data.parse import WobblyParser
 
 from ...types import FilteringPositionEnum
 from .abstract import AbstractProcessingStrategy
+from .custom_lists import CustomListStrategy
 
 __all__ = [
     'ProcessingStrategyManager'
@@ -28,7 +29,7 @@ class ProcessingStrategyManager:
             if name.endswith('_strategy') and value is not None
         ])
 
-        all_strategies.extend(custom_list for custom_list in wobbly_parsed.custom_lists)
+        all_strategies.extend(map(CustomListStrategy, wobbly_parsed.custom_lists))
 
         self._strategies = all_strategies
 
