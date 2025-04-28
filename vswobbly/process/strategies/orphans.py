@@ -62,6 +62,7 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
         """
 
         try:
+            from vsdeinterlace import QTempGaussMC, SourceMatchMode, LosslessMode
             from havsfunc import QTGMC
         except ImportError:
             raise DependencyNotFoundError(self.apply, 'havsfunc')
@@ -78,7 +79,22 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
         )
 
         deint_clip = self._qtgmc(QTGMC, clip, **(qtgmc_kwargs | dict()))
-        deint_clip = deint_clip[wobbly_parsed.field_order.is_tff::2]
+        qtgmc = deint_clip[wobbly_parsed.field_order.is_tff::2]
+
+        # qtgmc = (
+        #     QTempGaussMC(clip, tff=wobbly_parsed.field_order.is_tff)
+        #     .prefilter(tr=1)
+        #     .basic(tr=1)
+        #     .denoise(tr=1)
+        #     .source_match(mode=SourceMatchMode.TWICE_REFINED)
+        #     .lossless(mode=LosslessMode.POSTSMOOTH)
+        #     .sharpen()
+        #     .sharpen_limit()
+        #     .motion_blur()
+        #     .back_blend()
+        #     .final(tr=3)
+        #     .process(blksize=8)
+        # )[wobbly_parsed.field_order.is_tff::2]
 
         n_deint_frames = [
             f.frame for f in wobbly_parsed.orphan_frames.find_matches('n')
@@ -93,8 +109,8 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
         if not n_deint_frames and not b_deint_frames:
             return clip
 
-        clip = replace_ranges(clip, deint_clip.std.SetFrameProps(wobbly_orphan_deint_field='n'), n_deint_frames)
-        clip = replace_ranges(clip, deint_clip.std.SetFrameProps(wobbly_orphan_deint_field='b'), b_deint_frames)
+        clip = replace_ranges(clip, qtgmc.std.SetFrameProps(wobbly_orphan_deint_field='n'), n_deint_frames)
+        clip = replace_ranges(clip, qtgmc.std.SetFrameProps(wobbly_orphan_deint_field='b'), b_deint_frames)
 
         return clip
 

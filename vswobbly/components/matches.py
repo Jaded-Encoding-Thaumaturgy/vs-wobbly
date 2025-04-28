@@ -1,10 +1,12 @@
 from typing import Any
+from dataclasses import dataclass, field
 
+from vstools import CustomValueError, DependencyNotFoundError, vs, core, FieldBased
 from vsdenoise import DFTTest
 from vsmasktools import FDoG
 from vstools import (CustomIndexError, CustomValueError,
                      DependencyNotFoundError, FieldBased, core, get_prop,
-                     vs)
+                     vs, FieldBased)
 
 from .types import ValidMatchT
 
@@ -13,11 +15,20 @@ __all__ = [
 ]
 
 
+@dataclass(frozen=True)
+class OriginalMatches:
+    """Immutable container for original matches."""
+
+    matches: tuple[str, ...] = field(default_factory=tuple)
+
+
 class FieldMatches(list[str]):
     """Class for holding field matches."""
 
     def __init__(self, matches: list[str] | None = None) -> None:
         super().__init__(matches or [])
+
+        self._original_matches = OriginalMatches(tuple(self))
 
     def __contains__(self, match: str | int | Any) -> bool:
         if isinstance(match, str):
@@ -75,11 +86,11 @@ class FieldMatches(list[str]):
         if not isinstance(orphans, OrphanFrames):
             raise CustomValueError('Orphans must be an OrphanFrames instance!', orphans)
 
-        if not hasattr(core, 'vmaf'):
-            raise DependencyNotFoundError(self.set_orphans_to_combed_matches, 'vmaf')
+        # if not hasattr(core, 'vmaf'):
+        #     raise DependencyNotFoundError(self.set_orphans_to_combed_matches, 'vmaf')
 
-        pref = DFTTest.denoise(clip, sloc=[(0.0, 3.0), (0.3, 8.0), (0.35, 12.0), (1.0, 24.0)])
-        pref = FDoG.edgemask(pref)
+        # pref = DFTTest.denoise(clip, sloc=[(0.0, 3.0), (0.3, 8.0), (0.35, 12.0), (1.0, 24.0)])
+        # pref = FDoG.edgemask(pref)
 
         for orphan in orphans:
             frame, match = orphan.frame, orphan.match
@@ -87,14 +98,13 @@ class FieldMatches(list[str]):
             if (match == 'n' and frame == 0) or (match == 'b' and frame == len(self) - 1):
                 continue
 
-            if self._check_frame_similarity(frame, match, pref):
-                continue
+            # if self._check_frame_similarity(frame, match, pref):
+            #     continue
 
             self[frame] = 'c'
 
     def apply(self, clip: vs.VideoNode) -> vs.VideoNode:
         """Apply the matches to the clip."""
-
         if not hasattr(core, 'fh'):
             raise DependencyNotFoundError(self.apply, 'FieldHint')
 
@@ -104,8 +114,8 @@ class FieldMatches(list[str]):
 
         match_clips = dict[str, vs.VideoNode]()
 
-        for match in set(self):
-            match_clips[match] = fh.std.SetFrameProps(WobblyMatch=match)
+        for match, original_match in zip(self, self.original_matches.matches):
+            match_clips[match] = fh.std.SetFrameProps(WobblyMatch=match, WobblyOriginalMatch=original_match)
 
         return fh.std.FrameEval(lambda n: match_clips[self[n]])
 
@@ -118,3 +128,9 @@ class FieldMatches(list[str]):
         ssim_score = get_prop(ssim_frame, 'float_ssim', float)
 
         return ssim_score >= 0.75
+
+    @property
+    def original_matches(self) -> OriginalMatches:
+        """Get the immutable original matches."""
+
+        return self._original_matches
