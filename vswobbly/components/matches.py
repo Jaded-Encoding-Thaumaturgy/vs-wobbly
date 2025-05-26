@@ -81,7 +81,7 @@ class FieldMatches(list[str]):
             raise DependencyNotFoundError(self.apply, 'FieldHint')
 
         fh = clip.fh.FieldHint(
-            tff=FieldBased.from_video(clip), matches=self.fieldhint_string
+            tff=FieldBased.from_video(clip).is_tff, matches=self.fieldhint_string
         )
 
         match_clips = dict[str, vs.VideoNode]()
