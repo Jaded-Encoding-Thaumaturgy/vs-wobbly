@@ -1,6 +1,10 @@
-from typing import Any
-
-from vstools import VSFunctionKwArgs, DependencyNotFoundError, replace_ranges, vs, CustomValueError
+from vstools import (
+    FieldBased,
+    replace_ranges,
+    vs,
+    CustomValueError,
+)
+from vsdeinterlace import QTempGaussMC
 
 from vswobbly.types import FilteringPositionEnum
 
@@ -18,7 +22,9 @@ FieldMatchGroupT = list[int]
 class _OrphanFieldSplitter:
     """Helper class that splits orphaned fields into separate lists based on their field match."""
 
-    def split_fields(self, wobbly_parsed: WobblyParser) -> tuple[FieldMatchGroupT, FieldMatchGroupT, FieldMatchGroupT, FieldMatchGroupT]:
+    def split_fields(
+        self, wobbly_parsed: WobblyParser
+    ) -> tuple[FieldMatchGroupT, FieldMatchGroupT, FieldMatchGroupT, FieldMatchGroupT]:
         orphan_n, orphan_b, orphan_u, orphan_p = [], [], [], []
 
         for frame in wobbly_parsed.orphan_frames:
@@ -45,7 +51,9 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
 
     # This is largely copied from my old parser.
     # This should ideally be rewritten at some point to not use QTGMC.
-    def apply(self, clip: vs.VideoNode, wobbly_parsed: WobblyParser) -> vs.VideoNode:
+    def apply(
+        self, clip: vs.VideoNode, wobbly_parsed: WobblyParser, qtgmc_obj: QTempGaussMC | None = None
+    ) -> vs.VideoNode:
         """
         Apply match-based deinterlacing to the given frames using QTGMC.
 
@@ -56,28 +64,31 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
         :param clip:            The clip to process.
         :param wobbly_parsed:   The parsed wobbly file. See the `WobblyParser` class for more information,
                                 including all the data that is available.
+        :param qtgmc_obj:       The `vsdeinterlace.QTempGaussMC` object to use. If not provided, a new one will be created.
+                                Every relevant method should be called on this object by the user if provided,
+                                up until the "deinterlace" method, which will be called in this strategy.
 
         :return:                Clip with the processing applied to the selected frames.
         """
 
-        try:
-            from havsfunc import QTGMC
-        except ImportError:
-            raise DependencyNotFoundError(self.apply, 'havsfunc')
-
         clip = clip.std.SetFrameProps(wobbly_orphan_deint=False)
+        field_order = FieldBased.from_param_or_video(wobbly_parsed.field_order, clip)
 
-        qtgmc_kwargs = self._qtgmc_kwargs() | dict(TFF=wobbly_parsed.field_order.is_tff)
-        qtgmc_kwargs.pop('FPSDivisor', None)
-        qtgmc_kwargs.pop('InputType', None)
+        clip = field_order.apply(clip)
 
-        deint = self._qtgmc(QTGMC, clip, **qtgmc_kwargs)
-        deint_b = deint[wobbly_parsed.field_order.is_tff::2]
+        if qtgmc_obj is None:
+            qtgmc_obj = self._qtgmc(clip)
+        else:
+            qtgmc_obj.clip = clip  # type: ignore
 
-        deint = replace_ranges(
-            clip, deint_b,
-            [orphan.frame for orphan in wobbly_parsed.orphan_frames.find_matches('b')]
-        )
+        deint = qtgmc_obj.deinterlace(clip)  # type: ignore
+
+        assert isinstance(deint, vs.VideoNode)
+
+        deint = deint.std.SetFrameProps(wobbly_orphan_deint=True)
+        deint = deint[field_order.is_tff :: 2]
+
+        deint = replace_ranges(clip, deint, [orphan.frame for orphan in wobbly_parsed.orphan_frames.find_matches('b')])
 
         return deint
 
@@ -87,17 +98,20 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
 
         return FilteringPositionEnum.PRE_DECIMATE
 
-    def _qtgmc(self, qtgmc: VSFunctionKwArgs, clip: vs.VideoNode, **kwargs: Any) -> vs.VideoNode:
-        """Apply QTGMC to the given clip."""
+    def _qtgmc(self, clip: vs.VideoNode) -> QTempGaussMC:
+        """Create a QTGMC object for the given clip."""
 
-        return qtgmc(clip, **kwargs).std.SetFrameProps(wobbly_orphan_deint=True)
-
-    def _qtgmc_kwargs(self) -> dict[str, int | bool | str]:
-        """QTGMC kwargs."""
-
-        return dict(
-            TR0=2, TR1=2, TR2=2, Sharpness=0, Lossless=1, InputType=0,
-            Rep0=3, Rep1=3, Rep2=2, SourceMatch=3, EdiMode='EEDI3+NNEDI3', EdiQual=2,
-            Sbb=3, SubPel=4, SubPelInterp=2, opencl=False, RefineMotion=True,
-            Preset='Placebo', MatchPreset='Placebo', MatchPreset2='Placebo'
+        return (
+            QTempGaussMC(clip)
+            .prefilter(tr=1)
+            .analyze()
+            .denoise(tr=1)
+            .basic(tr=1)
+            .source_match(tr=1)
+            .lossless(mode=QTempGaussMC.LosslessMode.POSTSMOOTH)
+            .sharpen()
+            .back_blend()
+            .sharpen_limit(mode=QTempGaussMC.SharpLimitMode.TEMPORAL_POSTSMOOTH)
+            .final(tr=1)
+            .motion_blur()
         )
