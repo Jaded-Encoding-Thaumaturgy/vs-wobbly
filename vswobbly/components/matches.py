@@ -28,6 +28,7 @@ class FieldMatches(list[str]):
         """Create match properties for the class."""
 
         for match in ValidMatchT.__args__:  # type: ignore
+
             def create_match_property(match: ValidMatchT) -> property:
                 """Create a match property for the class."""
 
@@ -80,9 +81,7 @@ class FieldMatches(list[str]):
         if not hasattr(core, 'fh'):
             raise DependencyNotFoundError(self.apply, 'FieldHint')
 
-        fh = clip.fh.FieldHint(
-            tff=FieldBased.from_video(clip).is_tff, matches=self.fieldhint_string
-        )
+        fh = clip.fh.FieldHint(tff=FieldBased.from_video(clip).is_tff, matches=self.fieldhint_string)
 
         match_clips = dict[str, vs.VideoNode]()
 

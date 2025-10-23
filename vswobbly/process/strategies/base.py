@@ -5,29 +5,30 @@ from ...types import FilteringPositionEnum
 from .abstract import AbstractProcessingStrategy
 from .custom_lists import CustomListStrategy
 
-__all__ = [
-    'ProcessingStrategyManager'
-]
+__all__ = ['ProcessingStrategyManager']
 
 
 class ProcessingStrategyManager:
     """Class for managing and executing processing strategies in a specific order."""
 
-    def init_strategies(self, wobbly_parsed: WobblyParser, strategies: list[AbstractProcessingStrategy] | None = None) -> None:
+    def init_strategies(
+        self, wobbly_parsed: WobblyParser, strategies: list[AbstractProcessingStrategy] | None = None
+    ) -> None:
         """Initialize and validate the list of strategies."""
 
         all_strategies = []
 
         if strategies:
-            all_strategies.extend([
-                strategy() if not isinstance(strategy, AbstractProcessingStrategy) else strategy
-                for strategy in strategies
-            ])
+            all_strategies.extend(
+                [
+                    strategy() if not isinstance(strategy, AbstractProcessingStrategy) else strategy
+                    for strategy in strategies
+                ]
+            )
 
-        all_strategies.extend([
-            value for name, value in vars(self).items()
-            if name.endswith('_strategy') and value is not None
-        ])
+        all_strategies.extend(
+            [value for name, value in vars(self).items() if name.endswith('_strategy') and value is not None]
+        )
 
         all_strategies.extend(map(CustomListStrategy, wobbly_parsed.custom_lists))
 
@@ -64,15 +65,9 @@ class ProcessingStrategyManager:
                 uncallable.append(strategy)
 
         if uncallable:
-            raise CustomValueError(
-                f"The following strategies are not callable: {uncallable}", self.init_strategies
-            )
+            raise CustomValueError(f'The following strategies are not callable: {uncallable}', self.init_strategies)
 
     def _get_strategies_for_position(self, position: FilteringPositionEnum) -> list[AbstractProcessingStrategy]:
         """Get all strategies that should run at the given position."""
 
-        return [
-            strategy for strategy in self._strategies
-            if strategy.position == position
-        ]
-
+        return [strategy for strategy in self._strategies if strategy.position == position]

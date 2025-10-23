@@ -32,7 +32,7 @@ class OrphanFrame:
             raise CustomValueError(f'Invalid match character: {self.match}', self)
 
         if self.match == 'c':
-            raise CustomValueError('Orphan frames cannot have a \'c\' match!', self)
+            raise CustomValueError("Orphan frames cannot have a 'c' match!", self)
 
     def __str__(self) -> str:
         return f'Frame {self.frame} ({self.match})'
@@ -73,10 +73,7 @@ class OrphanFrames(list[OrphanFrame]):
 
                     return self.find_matches(match)
 
-                return property(
-                    getter,
-                    doc=f"Get all frames with a '{match}' match."
-                )
+                return property(getter, doc=f"Get all frames with a '{match}' match.")
 
             setattr(cls, f'{match}_matches', create_match_property(match))
 
@@ -93,11 +90,7 @@ class OrphanFrames(list[OrphanFrame]):
             if matches[section.start] == 'n':
                 orphans.append(OrphanFrame(section.start, 'n'))
 
-            end_frame = (
-                sections[idx + 1].start - 1
-                if idx < len(sections) - 1
-                else len(matches) - 1
-            )
+            end_frame = sections[idx + 1].start - 1 if idx < len(sections) - 1 else len(matches) - 1
 
             if matches[end_frame] == 'b':
                 orphans.append(OrphanFrame(end_frame, 'b'))
@@ -130,7 +123,7 @@ class OrphanFrames(list[OrphanFrame]):
             clip = replace_ranges(
                 clip.std.SetFrameProps(WobblyOrphanFrame=False),
                 clip.std.SetFrameProps(WobblyOrphanFrame=match),
-                self.find_matches(match).frames
+                self.find_matches(match).frames,
             )
 
         return clip

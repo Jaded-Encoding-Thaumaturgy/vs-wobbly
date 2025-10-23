@@ -43,6 +43,7 @@ class Sections(list[Section]):
 
     def __init__(self, sections: list[Section]) -> None:
         super().__init__(sections or [])
+
     def __str__(self) -> str:
         if not self:
             return ''
@@ -67,10 +68,7 @@ class Sections(list[Section]):
         if not decimations:
             return Keyframes([section.start for section in self])
 
-        keyframes = [
-            section.start - bisect_left(decimations, section.start)
-            for section in self
-        ]
+        keyframes = [section.start - bisect_left(decimations, section.start) for section in self]
 
         return Keyframes(keyframes)
 
@@ -90,12 +88,10 @@ class Sections(list[Section]):
         framerates = [wclip.fps.numerator / cycle * i for i in range(cycle, 0, -1)]
 
         fps_clips = [
-            clip.std.AssumeFPS(None, int(fps), wclip.fps.denominator)
-            .std.SetFrameProps(
-                WobblyCycleFps=int(fps // 1000),
-                _DurationNum=int(fps),
-                _DurationDen=wclip.fps.denominator
-            ) for fps in framerates
+            clip.std.AssumeFPS(None, int(fps), wclip.fps.denominator).std.SetFrameProps(
+                WobblyCycleFps=int(fps // 1000), _DurationNum=int(fps), _DurationDen=wclip.fps.denominator
+            )
+            for fps in framerates
         ]
 
         max_dec = max(wobbly_parsed.decimations) + 1
@@ -108,8 +104,8 @@ class Sections(list[Section]):
         n_split_decimations = len(split_decimations)
 
         indices = [
-            0 if (sd_idx := ceil(n / cycle)) >= n_split_decimations
-            else len(split_decimations[sd_idx]) for n in range(clip.num_frames)
+            0 if (sd_idx := ceil(n / cycle)) >= n_split_decimations else len(split_decimations[sd_idx])
+            for n in range(clip.num_frames)
         ]
 
         # Set pattern for each frame based on which section it falls into
@@ -127,11 +123,7 @@ class Sections(list[Section]):
 
             pattern_props.append(self[section_idx].dominant_pattern)
 
-        return clip.std.FrameEval(
-            lambda n: fps_clips[indices[n]].std.SetFrameProps(
-                WobblyPattern=pattern_props[n]
-            )
-        )
+        return clip.std.FrameEval(lambda n: fps_clips[indices[n]].std.SetFrameProps(WobblyPattern=pattern_props[n]))
 
     def set_patterns(self, matches: FieldMatches) -> None:
         """Set the dominant patterns for all sections based on the matches."""
@@ -140,7 +132,7 @@ class Sections(list[Section]):
 
         warnings.warn(
             'Sections.set_patterns: This method is not yet implemented and will be implemented in a future version.',
-            DeprecationWarning
+            DeprecationWarning,
         )
 
         return

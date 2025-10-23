@@ -8,9 +8,7 @@ from vswobbly.types import FilteringPositionEnum
 from .strategies.abstract import AbstractProcessingStrategy
 from .strategies.base import ProcessingStrategyManager
 
-__all__ = [
-    'WobblyProcessor'
-]
+__all__ = ['WobblyProcessor']
 
 
 @dataclass
@@ -35,7 +33,7 @@ class WobblyProcessor(ProcessingStrategyManager):
         self,
         parser: WobblyParser,
         work_clip: vs.VideoNode | None = None,
-        strategies: list[AbstractProcessingStrategy] = []
+        strategies: list[AbstractProcessingStrategy] = [],
     ) -> None:
         if work_clip is None:
             work_clip = parser.work_clip

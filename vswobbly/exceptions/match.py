@@ -1,7 +1,6 @@
 from typing import Any
 
-from vstools import (CustomTypeError, CustomValueError, FuncExceptT,
-                     SupportsString)
+from vstools import CustomTypeError, CustomValueError, FuncExceptT, SupportsString
 
 __all__ = [
     'InvalidMatchError',
@@ -12,9 +11,12 @@ class InvalidMatchError(CustomValueError):
     """Raised when an invalid match character is used."""
 
     def __init__(
-        self, func: FuncExceptT, invalid_matches: str | list[str],
+        self,
+        func: FuncExceptT,
+        invalid_matches: str | list[str],
         message: SupportsString = 'Invalid match(es)!',
-        reason: Any = '{invalid_matches}', **kwargs: Any
+        reason: Any = '{invalid_matches}',
+        **kwargs: Any,
     ) -> None:
         super().__init__(message, func, reason, **kwargs, invalid_matches=invalid_matches)
 

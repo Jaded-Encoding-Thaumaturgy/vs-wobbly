@@ -27,9 +27,7 @@ class FreezeFrame:
         NegativeFrameError.check(self.__class__, [self.first, self.last, self.replacement])
 
         if self.first > self.last:
-            raise CustomValueError(
-                f'First frame ({self.first}) must start before the last frame ({self.last})!', self
-            )
+            raise CustomValueError(f'First frame ({self.first}) must start before the last frame ({self.last})!', self)
 
     def __iter__(self) -> tuple[int, int, int]:
         """Return a tuple of first, last and replacement frames for unpacking."""
@@ -52,9 +50,7 @@ class FreezeFrames(list[FreezeFrame]):
                 wrong_ranges.append((start, end))
 
         if wrong_ranges:
-            raise CustomValueError(
-                f'First frame must start before the last frame! ({wrong_ranges})', self
-            )
+            raise CustomValueError(f'First frame must start before the last frame! ({wrong_ranges})', self)
 
     def apply(self, clip: vs.VideoNode) -> vs.VideoNode:
         """Apply the freeze frames to the clip."""
@@ -68,9 +64,7 @@ class FreezeFrames(list[FreezeFrame]):
                 frozen = clip.std.FreezeFrames(freeze.first, freeze.last, freeze.replacement)
                 frozen = frozen.std.SetFrameProps(WobblyFreeze=[freeze.first, freeze.last, freeze.replacement])
             except vs.Error as e:
-                raise CustomValueError(
-                    f'Failed to apply freeze frames ({freeze}): {e}', self
-                ) from e
+                raise CustomValueError(f'Failed to apply freeze frames ({freeze}): {e}', self) from e
 
             clip = replace_ranges(clip, frozen, [(freeze.first, freeze.last)])
 
@@ -86,8 +80,9 @@ class FreezeFrames(list[FreezeFrame]):
             replacements.append(freeze.replacement)
 
             clip = replace_ranges(
-                clip, clip.std.SetFrameProps(WobblyFreeze=[freeze.first, freeze.last, freeze.replacement]),
-                [(freeze.first, freeze.last)]
+                clip,
+                clip.std.SetFrameProps(WobblyFreeze=[freeze.first, freeze.last, freeze.replacement]),
+                [(freeze.first, freeze.last)],
             )
 
         # TODO: The current issue is that props don't persist if the replacement isn't in the range of (first, last).

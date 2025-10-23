@@ -49,7 +49,5 @@ class CombedFrames(list[int]):
         """Set the combed frame properties on the clip."""
 
         return replace_ranges(
-            clip.std.SetFrameProps(WobblyCombed=False),
-            clip.std.SetFrameProps(WobblyCombed=True),
-            self
+            clip.std.SetFrameProps(WobblyCombed=False), clip.std.SetFrameProps(WobblyCombed=True), self
         )

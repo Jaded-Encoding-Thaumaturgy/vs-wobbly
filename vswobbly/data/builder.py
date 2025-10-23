@@ -2,22 +2,31 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from vstools import (FieldBased, FieldBasedT, FileNotExistsError,
-                     FileWasNotFoundError, SPath, SPathLike)
+from vstools import FieldBased, FieldBasedT, FileNotExistsError, FileWasNotFoundError, SPath, SPathLike
 
-from ..components import (CombedFrames, CustomList, CustomLists, Decimations,
-                          FieldMatches, FreezeFrame, FreezeFrames,
-                          InterlacedFade, InterlacedFades, Preset, Presets,
-                          Section, Sections, WobblyVideo)
+from ..components import (
+    CombedFrames,
+    CustomList,
+    CustomLists,
+    Decimations,
+    FieldMatches,
+    FreezeFrame,
+    FreezeFrames,
+    InterlacedFade,
+    InterlacedFades,
+    Preset,
+    Presets,
+    Section,
+    Sections,
+    WobblyVideo,
+)
 from ..data.parse import WobblyParser
 from ..data.validation import WobblyValidator
 from ..exceptions import NotAWobblyFileError, WobblyParseError
 from ..types import FilteringPositionEnum
 from ..util import to_snake_case
 
-__all__ = [
-    'WobblyBuilder'
-]
+__all__ = ['WobblyBuilder']
 
 
 @dataclass
@@ -48,24 +57,24 @@ class WobblyBuilder:
             work_clip=video_data.work_clip,
             video_data=video_data,
             field_order=field_order,
-            **self._parse_data()
+            **self._parse_data(),
         )
 
     def _check_file_path(self) -> None:
         """Check if the file path is valid."""
 
         if not self.file_path.exists():
-            raise FileWasNotFoundError(f"File path does not exist: \'{self.file_path}\'", self)
+            raise FileWasNotFoundError(f"File path does not exist: '{self.file_path}'", self)
 
         if not self.file_path.is_file():
-            raise FileNotExistsError(f"File path is not a file: \'{self.file_path}\'", self)
+            raise FileNotExistsError(f"File path is not a file: '{self.file_path}'", self)
 
         if not self.file_path.suffix == '.wob':
-            raise NotAWobblyFileError("You must provide a wobbly file!", self)
+            raise NotAWobblyFileError('You must provide a wobbly file!', self)
 
         # We check for 2 bytes because wibbly writes 2 bytes when initializing
         if self.file_path.get_size() <= 2:
-            raise WobblyParseError(f"File is empty: \'{self.file_path}\'", self)
+            raise WobblyParseError(f"File is empty: '{self.file_path}'", self)
 
     def _load_data(self) -> None:
         """Load the wobbly data."""
@@ -74,10 +83,7 @@ class WobblyBuilder:
             self._data = json.load(file)
 
     def _build_video_data(self) -> WobblyVideo:
-        return WobblyVideo(
-            SPath(self.file_path).as_posix(),
-            self._data
-        )
+        return WobblyVideo(SPath(self.file_path).as_posix(), self._data)
 
     def _build_field_order(self) -> FieldBasedT:
         vivtc_params = self._data.get('vfm parameters', {})
@@ -88,16 +94,18 @@ class WobblyBuilder:
     def _parse_data(self) -> dict[str, Any]:
         """Parse the wobbly data into their respective component classes."""
 
-        parsed_data = self._parse_components({
-            Presets.wob_json_key(): ('presets', Presets, Preset),
-            FieldMatches.wob_json_key(): ('field_matches', FieldMatches, str),
-            CombedFrames.wob_json_key(): ('combed_frames', CombedFrames, int),
-            Decimations.wob_json_key(): ('decimations', Decimations, int),
-            Sections.wob_json_key(): ('sections', Sections, Section),
-            InterlacedFades.wob_json_key(): ('interlaced_fades', InterlacedFades, InterlacedFade),
-            CustomLists.wob_json_key(): ('custom_lists', CustomLists, CustomList),
-            FreezeFrames.wob_json_key(): ('freeze_frames', FreezeFrames, FreezeFrame),
-        })
+        parsed_data = self._parse_components(
+            {
+                Presets.wob_json_key(): ('presets', Presets, Preset),
+                FieldMatches.wob_json_key(): ('field_matches', FieldMatches, str),
+                CombedFrames.wob_json_key(): ('combed_frames', CombedFrames, int),
+                Decimations.wob_json_key(): ('decimations', Decimations, int),
+                Sections.wob_json_key(): ('sections', Sections, Section),
+                InterlacedFades.wob_json_key(): ('interlaced_fades', InterlacedFades, InterlacedFade),
+                CustomLists.wob_json_key(): ('custom_lists', CustomLists, CustomList),
+                FreezeFrames.wob_json_key(): ('freeze_frames', FreezeFrames, FreezeFrame),
+            }
+        )
 
         self._build_orphan_frames(parsed_data)
 
@@ -170,10 +178,7 @@ class WobblyBuilder:
         all_presets = self._data.get('presets', [])
 
         return {
-            p['name']: Preset(
-                name=self._to_snake_case(p['name']),
-                **{k: v for k, v in p.items() if k != 'name'}
-            )
+            p['name']: Preset(name=self._to_snake_case(p['name']), **{k: v for k, v in p.items() if k != 'name'})
             for p in all_presets
         }
 
@@ -183,10 +188,7 @@ class WobblyBuilder:
         return bool(section_dict.get('presets', []))
 
     def _add_section_presets_to_custom_lists(
-        self,
-        section_dict: dict,
-        presets: list[Preset],
-        all_sections: list[dict]
+        self, section_dict: dict, presets: list[Preset], all_sections: list[dict]
     ) -> None:
         """Add section presets to custom lists."""
 
@@ -198,12 +200,14 @@ class WobblyBuilder:
         end = self._get_section_end(section_idx, all_sections)
 
         for preset in presets:
-            self._data['custom lists'].append({
-                'name': f"section_{start}_{end}_{preset.name}",
-                'preset': preset,
-                'position': FilteringPositionEnum.PRE_DECIMATE,
-                'frames': [(start, end)]
-            })
+            self._data['custom lists'].append(
+                {
+                    'name': f'section_{start}_{end}_{preset.name}',
+                    'preset': preset,
+                    'position': FilteringPositionEnum.PRE_DECIMATE,
+                    'frames': [(start, end)],
+                }
+            )
 
     def _get_section_end(self, section_idx: int, all_sections: list[dict]) -> int:
         """Get end frame for section."""
@@ -223,17 +227,16 @@ class WobblyBuilder:
                 item_class(
                     **{
                         **{to_snake_case(k): v for k, v in item.items() if k != 'preset' and k != 'frames'},
-                        'preset': preset_lookup.get(item['preset'].name if isinstance(item['preset'], Preset) else item['preset']),
-                        'frames': [tuple(frame) for frame in item['frames']]
+                        'preset': preset_lookup.get(
+                            item['preset'].name if isinstance(item['preset'], Preset) else item['preset']
+                        ),
+                        'frames': [tuple(frame) for frame in item['frames']],
                     }
                 )
                 for item in data
             ]
 
-        return [
-            item_class(**{to_snake_case(k): v for k, v in item.items()})
-            for item in data
-        ]
+        return [item_class(**{to_snake_case(k): v for k, v in item.items()}) for item in data]
 
     def _process_list_items(self, data: list[list], item_class: type) -> list:
         """Process list items into their respective dataclass instances."""

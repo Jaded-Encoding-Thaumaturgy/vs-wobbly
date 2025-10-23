@@ -10,6 +10,7 @@ __all__ = [
     'DecombVinverseStrategy',
 ]
 
+
 class DecombVinverseStrategy(AbstractProcessingStrategy):
     """Decomb strategy using vinverse to get rid of combed frames."""
 

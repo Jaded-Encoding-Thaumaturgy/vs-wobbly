@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from vstools import (CustomValueError, VSFunctionNoArgs, fallback,
-                     replace_ranges, vs)
+from vstools import CustomValueError, VSFunctionNoArgs, fallback, replace_ranges, vs
 
 from ..exceptions import NegativeFrameError
 
@@ -28,11 +27,7 @@ class InterlacedFade:
         if not 0 <= self.field_difference <= 1:
             raise CustomValueError('Field difference must be between 0 and 1!', self, self.field_difference)
 
-    def apply(
-        self,
-        clip: vs.VideoNode,
-        filter: VSFunctionNoArgs | None = None
-    ) -> vs.VideoNode:
+    def apply(self, clip: vs.VideoNode, filter: VSFunctionNoArgs | None = None) -> vs.VideoNode:
         """
         Apply the interlaced fade to the frame of the given clip using the specified filter.
 
@@ -66,11 +61,7 @@ class InterlacedFades(list[InterlacedFade]):
 
         NegativeFrameError.check(self.__class__, [fade.frame for fade in fallback(self, [])])
 
-    def apply(
-        self,
-        clip: vs.VideoNode,
-        filter: VSFunctionNoArgs | None = None
-    ) -> vs.VideoNode:
+    def apply(self, clip: vs.VideoNode, filter: VSFunctionNoArgs | None = None) -> vs.VideoNode:
         """
         Apply the interlaced fades to the clip using the specified filter.
 
@@ -96,9 +87,7 @@ class InterlacedFades(list[InterlacedFade]):
         if not callable(filter):
             raise CustomValueError('Filter must be a callable!', self, filter)
 
-        return replace_ranges(
-            clip, filter(clip), lambda n: n in set().union(*(fade.frame for fade in self))
-        )
+        return replace_ranges(clip, filter(clip), lambda n: n in set().union(*(fade.frame for fade in self)))
 
     def set_props(self, clip: vs.VideoNode) -> vs.VideoNode:
         """Set the interlaced fade properties on the clip."""
@@ -106,7 +95,7 @@ class InterlacedFades(list[InterlacedFade]):
         return replace_ranges(
             clip.std.SetFrameProps(WobblyInterlacedFades=False),
             clip.std.SetFrameProps(WobblyInterlacedFades=True),
-            [fade.frame for fade in self]
+            [fade.frame for fade in self],
         )
 
     @classmethod

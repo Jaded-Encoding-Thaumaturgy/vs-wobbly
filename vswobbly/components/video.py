@@ -61,12 +61,12 @@ class WobblyVideo:
         namespace, filter_name = parts
 
         if not hasattr(core, namespace):
-            raise CustomValueError(f'Namespace \'{namespace}\' not found in core', self)
+            raise CustomValueError(f"Namespace '{namespace}' not found in core", self)
 
         namespace_obj = getattr(core, namespace)
 
         if not hasattr(namespace_obj, filter_name):
-            raise CustomValueError(f'Function \'{filter_name}\' not found in {namespace}', self)
+            raise CustomValueError(f"Function '{filter_name}' not found in {namespace}", self)
 
         return getattr(namespace_obj, filter_name)
 

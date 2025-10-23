@@ -4,7 +4,6 @@ from vstools import vs
 
 __all__ = [
     'ValidMatchT',
-
     'PresetProtocol',
     'SectionProtocol',
     'SectionsProtocol',
@@ -28,6 +27,7 @@ class PresetProtocol(Protocol):
     """Protocol defining the interface for presets."""
 
     name: str
+
     def apply(self, clip: vs.VideoNode, **kwargs: Any) -> vs.VideoNode: ...
 
 

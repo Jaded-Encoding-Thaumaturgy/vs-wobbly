@@ -39,15 +39,12 @@ setuptools.setup(
     },
     classifiers=[
         'Natural Language :: English',
-
         'Intended Audience :: Developers',
         'Intended Audience :: Other Audience',
-
         'Programming Language :: Python :: 3.12',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Typing :: Typed',
-
         'Topic :: Multimedia :: Video',
         'Topic :: Multimedia :: Video :: Display',
     ],

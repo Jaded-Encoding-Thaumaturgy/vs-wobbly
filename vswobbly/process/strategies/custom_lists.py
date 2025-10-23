@@ -10,6 +10,7 @@ __all__ = [
     'CustomListStrategy',
 ]
 
+
 class CustomListStrategy(AbstractProcessingStrategy):
     """Default strategy that applies a custom list defined directly in the wobbly file."""
 

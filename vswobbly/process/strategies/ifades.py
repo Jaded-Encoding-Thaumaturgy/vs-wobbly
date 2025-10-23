@@ -15,7 +15,9 @@ __all__ = [
 class _FrameRangeGrouper:
     """Helper class for grouping frame numbers into ranges."""
 
-    def group_frames_into_ranges(self, clip: vs.VideoNode, frame_nums: list[int], max_gap: int = 3) -> list[tuple[int, int]]:
+    def group_frames_into_ranges(
+        self, clip: vs.VideoNode, frame_nums: list[int], max_gap: int = 3
+    ) -> list[tuple[int, int]]:
         """
         Group frame numbers into ranges if they are close enough together.
 
@@ -34,7 +36,8 @@ class _FrameRangeGrouper:
         if invalid_frames := [x for x in frame_nums if not isinstance(x, int)]:
             raise CustomTypeError(
                 'All frame numbers must be integers or have an integer frame attribute!',
-                self.group_frames_into_ranges, invalid_frames
+                self.group_frames_into_ranges,
+                invalid_frames,
             )
 
         frame_nums = sorted(frame_nums)

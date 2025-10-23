@@ -2,19 +2,13 @@ from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
 from typing import Iterable, Any, Self
 
-from vstools import (
-    CustomRuntimeError, CustomValueError, FrameRangesN,
-    replace_ranges, vs
-)
+from vstools import CustomRuntimeError, CustomValueError, FrameRangesN, replace_ranges, vs
 
 from ..types import FilteringPositionEnum
 from .decimations import Decimations
 from .types import PresetProtocol, SectionsProtocol
 
-__all__ = [
-    'CustomList',
-    'CustomLists'
-]
+__all__ = ['CustomList', 'CustomLists']
 
 
 @dataclass
@@ -109,16 +103,14 @@ class CustomList:
             flt = self.preset.apply(clip, **kwargs)
         except Exception as e:
             raise CustomRuntimeError(
-                f'Error applying preset of custom list \'{self.name}\': '
+                f"Error applying preset of custom list '{self.name}': "
                 f'Invalid Python code in preset contents.\nOriginal error: {e}',
-                self.apply
+                self.apply,
             )
 
         for _range in self._frames_to_ranges(self.frames):
             range_flt = flt.std.SetFrameProps(
-                WobblyPreset=str(self.preset),
-                WobblyPresetPosition=self.position.value,
-                WobblyPresetFrames=_range
+                WobblyPreset=str(self.preset), WobblyPresetPosition=self.position.value, WobblyPresetFrames=_range
             )
 
             if self.position is FilteringPositionEnum.POST_DECIMATE:
@@ -135,10 +127,7 @@ class CustomList:
             if isinstance(_range, tuple) and _range[1] >= clip.num_frames:
                 _range = (_range[0], clip.num_frames - 1)
 
-            explained_range = (
-                _range if _range == effective_range
-                else f'{_range}, after decimation: {effective_range}'
-            )
+            explained_range = _range if _range == effective_range else f'{_range}, after decimation: {effective_range}'
 
             try:
                 clip = replace_ranges(clip, range_flt, effective_range)
@@ -147,16 +136,15 @@ class CustomList:
                     clip = replace_ranges(clip, range_flt, (effective_range[0], clip.num_frames - 1))
                 else:
                     raise CustomRuntimeError(
-                        f'Error applying custom list \'{self.name}\' (range: {explained_range}): {e}',
-                        self.apply
+                        f"Error applying custom list '{self.name}' (range: {explained_range}): {e}", self.apply
                     )
             except Exception as e:
                 raise CustomRuntimeError(
-                    f'Error applying custom list \'{self.name}\' (range: {explained_range}): {e}',
-                    self.apply
+                    f"Error applying custom list '{self.name}' (range: {explained_range}): {e}", self.apply
                 )
 
         return clip
+
 
 class CustomLists(list[CustomList]):
     """Class for holding a list of custom lists."""
@@ -177,7 +165,7 @@ class CustomLists(list[CustomList]):
                 f'section_{section.start}',
                 section.presets,
                 FilteringPositionEnum.PRE_DECIMATE,
-                FrameRangesN(section.start)
+                FrameRangesN(section.start),
             )
             for section in sections
         )

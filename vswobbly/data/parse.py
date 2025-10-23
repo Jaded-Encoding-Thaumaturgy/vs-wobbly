@@ -1,8 +1,17 @@
 from dataclasses import dataclass, field
 from typing import Any, Self
-from ..components import (CombedFrames, CustomLists, Decimations,
-                            FieldMatches, FreezeFrames, InterlacedFades,
-                            OrphanFrames, Presets, Sections, WobblyVideo)
+from ..components import (
+    CombedFrames,
+    CustomLists,
+    Decimations,
+    FieldMatches,
+    FreezeFrames,
+    InterlacedFades,
+    OrphanFrames,
+    Presets,
+    Sections,
+    WobblyVideo,
+)
 
 from vstools import FieldBased, FieldBasedT, SPath, SPathLike, vs
 
@@ -97,11 +106,7 @@ class WobblyParser:
     def _get_video_data(wob_file: SPath, data: dict[str, Any]) -> WobblyVideo:
         """Get the video data."""
 
-        return WobblyVideo(
-            wob_file.as_posix(),
-            data.get('trim', None),
-            data.get('source filter', '')
-        )
+        return WobblyVideo(wob_file.as_posix(), data.get('trim', None), data.get('source filter', ''))
 
     @staticmethod
     def _get_fieldbased_data(data: dict[str, Any]) -> FieldBasedT:
