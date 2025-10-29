@@ -81,7 +81,7 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
         else:
             qtgmc_obj.clip = clip  # type: ignore
 
-        deint = qtgmc_obj.deinterlace(clip)  # type: ignore
+        deint = qtgmc_obj.deinterlace()  # type: ignore
 
         assert isinstance(deint, vs.VideoNode)
 
