@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from vstools import vs
 
@@ -16,7 +17,13 @@ class AbstractProcessingStrategy(ABC):
 
     To write your own strategy, inherit from this class and implement
     the `apply` method and the `position` property.
+
+    :param kwargs:              Additional keyword arguments.
+                                These will be passed to the strategy when it is applied.
     """
+
+    def __init__(self, **kwargs: Any) -> None:
+        self._kwargs = kwargs
 
     @abstractmethod
     def apply(self, clip: vs.VideoNode, wobbly_parsed: WobblyParser) -> vs.VideoNode:

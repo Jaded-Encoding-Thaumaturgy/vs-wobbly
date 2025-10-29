@@ -1,9 +1,8 @@
 from vsdeinterlace import vinverse
 from vstools import replace_ranges, vs
 
-from ...types import FilteringPositionEnum
-
 from ...data.parse import WobblyParser
+from ...types import FilteringPositionEnum
 from .abstract import AbstractProcessingStrategy
 
 __all__ = [

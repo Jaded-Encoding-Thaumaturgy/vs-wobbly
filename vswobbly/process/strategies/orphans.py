@@ -1,11 +1,7 @@
-from vstools import (
-    FieldBased,
-    replace_ranges,
-    vs,
-    CustomValueError,
-)
 from vsdeinterlace import QTempGaussMC
+from vstools import CustomValueError, FieldBased, replace_ranges, vs
 
+from typing import Any
 from vswobbly.types import FilteringPositionEnum
 
 from ...data.parse import WobblyParser
@@ -46,7 +42,8 @@ class _OrphanFieldSplitter:
 class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
     """Strategy for dealing with orphan fields using match-based deinterlacing."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
         self._match_grouper = _OrphanFieldSplitter()
 
     # This is largely copied from my old parser.
@@ -76,10 +73,7 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
 
         clip = field_order.apply(clip)
 
-        if qtgmc_obj is None:
-            qtgmc_obj = self._qtgmc(clip)
-        else:
-            qtgmc_obj.clip = clip  # type: ignore
+        qtgmc_obj = self._kwargs.get('qtgmc_obj', False) or self._qtgmc(clip)
 
         deint = qtgmc_obj.deinterlace()  # type: ignore
 

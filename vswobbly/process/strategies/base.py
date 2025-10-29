@@ -1,6 +1,6 @@
 from vstools import CustomNotImplementedError, CustomValueError, vs
-from ...data.parse import WobblyParser
 
+from ...data.parse import WobblyParser
 from ...types import FilteringPositionEnum
 from .abstract import AbstractProcessingStrategy
 from .custom_lists import CustomListStrategy

@@ -1,6 +1,6 @@
 from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
-from typing import Iterable, Any, Self
+from typing import Any, Iterable, Self
 
 from vstools import CustomRuntimeError, CustomValueError, FrameRangesN, replace_ranges, vs
 

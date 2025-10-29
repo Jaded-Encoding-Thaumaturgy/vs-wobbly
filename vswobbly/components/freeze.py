@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from vstools import replace_ranges, CustomValueError, fallback, vs
+from vstools import CustomValueError, fallback, replace_ranges, vs
 
 from ..exceptions import NegativeFrameError
 

@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any, Self
+
+from vstools import FieldBased, FieldBasedT, SPath, SPathLike, vs
+
 from ..components import (
     CombedFrames,
     CustomLists,
@@ -12,8 +15,6 @@ from ..components import (
     Sections,
     WobblyVideo,
 )
-
-from vstools import FieldBased, FieldBasedT, SPath, SPathLike, vs
 
 __all__ = [
     'WobblyParser',

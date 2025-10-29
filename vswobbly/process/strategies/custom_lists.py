@@ -1,9 +1,9 @@
+from typing import Any
 from vstools import vs
-
-from ...types import FilteringPositionEnum
 
 from ...components import CustomList
 from ...data.parse import WobblyParser
+from ...types import FilteringPositionEnum
 from .abstract import AbstractProcessingStrategy
 
 __all__ = [
@@ -14,7 +14,8 @@ __all__ = [
 class CustomListStrategy(AbstractProcessingStrategy):
     """Default strategy that applies a custom list defined directly in the wobbly file."""
 
-    def __init__(self, custom_list: CustomList) -> None:
+    def __init__(self, custom_list: CustomList, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
         self._custom_list = custom_list
 
     def apply(self, clip: vs.VideoNode, wobbly_parsed: WobblyParser) -> vs.VideoNode:

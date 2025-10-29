@@ -1,14 +1,14 @@
+from bisect import bisect_left
 from dataclasses import dataclass, field
 from math import ceil
 from typing import Literal
-from bisect import bisect_left
 
 from vstools import Keyframes, vs
 
 from ..exceptions import NegativeFrameError
 from .decimations import Decimations
-from .types import PresetProtocol, SectionProtocol
 from .matches import FieldMatches
+from .types import PresetProtocol, SectionProtocol
 
 __all__ = [
     'Section',

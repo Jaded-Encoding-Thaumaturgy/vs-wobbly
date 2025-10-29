@@ -65,7 +65,8 @@ class _FrameRangeGrouper:
 class AverageFixInterlacedFadesStrategy(AbstractProcessingStrategy):
     """Strategy for fixing interlaced fades using the Average method."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
         self._frame_grouper = _FrameRangeGrouper()
 
     def apply(self, clip: vs.VideoNode, wobbly_parsed: WobblyParser) -> vs.VideoNode:
@@ -94,7 +95,8 @@ class AverageFixInterlacedFadesStrategy(AbstractProcessingStrategy):
 class AdaptiveFixInterlacedFadesStrategy(AbstractProcessingStrategy):
     """Strategy for fixing interlaced fades adaptively."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
         self._frame_grouper = _FrameRangeGrouper()
 
     def apply(self, clip: vs.VideoNode, wobbly_parsed: WobblyParser, **kwargs: Any) -> vs.VideoNode:

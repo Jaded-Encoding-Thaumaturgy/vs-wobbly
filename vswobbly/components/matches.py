@@ -1,7 +1,7 @@
 from typing import Any
-from vstools import CustomIndexError
 
-from vstools import CustomValueError, DependencyNotFoundError, vs, core, FieldBased
+from vstools import CustomIndexError, CustomValueError, DependencyNotFoundError, FieldBased, core, vs
+
 from .types import ValidMatchT
 
 __all__ = [
