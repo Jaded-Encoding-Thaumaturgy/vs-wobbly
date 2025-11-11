@@ -1,4 +1,4 @@
-from stgpytools import CustomStrEnum
+from jetpytools import CustomStrEnum
 
 __all__ = [
     'FilteringPositionEnum',
