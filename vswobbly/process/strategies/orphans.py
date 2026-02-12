@@ -1,9 +1,8 @@
 import logging
 
+from jetpytools import CustomValueError, DependencyNotFoundError
 from vsdeinterlace import QTempGaussMC
 from vstools import (
-    CustomValueError,
-    DependencyNotFoundError,
     FieldBased,
     core,
     depth,
@@ -140,7 +139,7 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
 
         return FilteringPositionEnum.PRE_DECIMATE
 
-    def _should_deinterlace(self, clip: vs.VideoNode, wobbly_parsed: WobblyParser) -> [vs.VideoNode, OrphanFrames]:
+    def _should_deinterlace(self, clip: vs.VideoNode, wobbly_parsed: WobblyParser) -> tuple[vs.VideoNode, OrphanFrames]:
         """
         Determine if the clip should be deinterlaced.
 
@@ -185,7 +184,7 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
         orphans_to_deint = OrphanFrames(orphans_to_deint)
 
         if orphans_to_keep:
-            clip = self._revert_field_matches(clip, wobbly_parsed, orphans_to_keep)
+            clip = self._revert_field_matches(clip, wobbly_parsed, OrphanFrames(orphans_to_keep))
 
         return clip, orphans_to_deint
 
@@ -211,13 +210,7 @@ class MatchBasedOrphanQTGMCStrategy(AbstractProcessingStrategy):
             QTempGaussMC(clip)
             .prefilter(tr=tr)
             .analyze(blksize=128, refine=5)
-            .denoise(tr=tr)
             .basic(tr=tr, thsad=480)
             .source_match(tr=tr, mode=QTempGaussMC.SourceMatchMode.TWICE_REFINED)
             .lossless(mode=QTempGaussMC.LosslessMode.PRESHARPEN)
-            .sharpen(mode=QTempGaussMC.SharpMode.NONE)
-            .back_blend()
-            .sharpen_limit(mode=QTempGaussMC.SharpLimitMode.NONE)
-            .final(tr=tr)
-            .motion_blur()
         )

@@ -2,7 +2,8 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from vstools import FieldBased, FieldBasedT, FileNotExistsError, FileWasNotFoundError, SPath, SPathLike
+from jetpytools import FileNotExistsError, FileWasNotFoundError, SPath, SPathLike
+from vstools import FieldBased, FieldBasedLike
 
 from ..components import (
     CombedFrames,
@@ -85,7 +86,7 @@ class WobblyBuilder:
     def _build_video_data(self) -> WobblyVideo:
         return WobblyVideo(SPath(self.file_path).as_posix(), self._data)
 
-    def _build_field_order(self) -> FieldBasedT:
+    def _build_field_order(self) -> FieldBasedLike:
         vivtc_params = self._data.get('vfm parameters', {})
         order = bool(vivtc_params.get('order', 1))
 

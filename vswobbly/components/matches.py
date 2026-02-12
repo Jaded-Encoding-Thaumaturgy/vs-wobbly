@@ -1,6 +1,7 @@
 from typing import Any
 
-from vstools import CustomIndexError, CustomValueError, DependencyNotFoundError, FieldBased, core, vs
+from jetpytools import CustomIndexError, CustomValueError, DependencyNotFoundError
+from vstools import FieldBased, core, vs
 
 from .types import ValidMatchT
 

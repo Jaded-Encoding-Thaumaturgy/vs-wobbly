@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any, Self
 
-from vstools import FieldBased, FieldBasedT, SPath, SPathLike, vs
+from jetpytools import SPath, SPathLike
+from vstools import FieldBased, FieldBasedLike, vs
 
 from ..components import (
     CombedFrames,
@@ -34,7 +35,7 @@ class WobblyParser:
     video_data: WobblyVideo
     """Source clip information."""
 
-    field_order: FieldBasedT = FieldBased.TFF
+    field_order: FieldBasedLike = FieldBased.TFF
     """Field order of the source clip."""
 
     sections: Sections = field(default_factory=Sections)
@@ -69,7 +70,7 @@ class WobblyParser:
         file_path: SPath,
         work_clip: vs.VideoNode,
         video_data: WobblyVideo,
-        field_order: FieldBasedT,
+        field_order: FieldBasedLike,
         sections: Sections | None = None,
         field_matches: FieldMatches | None = None,
         decimations: Decimations | None = None,
@@ -110,7 +111,7 @@ class WobblyParser:
         return WobblyVideo(wob_file.as_posix(), data.get('trim', None), data.get('source filter', ''))
 
     @staticmethod
-    def _get_fieldbased_data(data: dict[str, Any]) -> FieldBasedT:
+    def _get_fieldbased_data(data: dict[str, Any]) -> FieldBasedLike:
         """Get the fieldbased data."""
 
         vivtc_params = data.get('vfm parameters', {})

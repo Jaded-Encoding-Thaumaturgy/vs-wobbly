@@ -1,6 +1,6 @@
 from typing import Any, Iterable
 
-from vstools import CustomTypeError, CustomValueError, FuncExceptT, SupportsString
+from jetpytools import CustomTypeError, CustomValueError, FuncExceptT, SupportsString
 
 __all__ = [
     'NegativeFrameError',

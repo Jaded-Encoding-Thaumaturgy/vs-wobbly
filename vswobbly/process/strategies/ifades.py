@@ -1,7 +1,8 @@
 from typing import Any
 
 from vsdeinterlace import FixInterlacedFades
-from vstools import CustomTypeError, replace_ranges, vs
+from jetpytools import CustomTypeError
+from vstools import replace_ranges, vs
 
 from ...data.parse import WobblyParser
 from ...types import FilteringPositionEnum

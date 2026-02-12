@@ -1,4 +1,4 @@
-from vstools import CustomValueError
+from jetpytools import CustomValueError
 
 __all__ = [
     'WobblyParseError',

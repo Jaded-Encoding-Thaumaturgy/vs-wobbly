@@ -1,4 +1,5 @@
-from vstools import fallback, vs
+from jetpytools import fallback
+from vstools import vs
 
 from ..exceptions import NegativeFrameError
 from ..util import deduplicate_list

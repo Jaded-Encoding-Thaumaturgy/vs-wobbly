@@ -1,4 +1,5 @@
-from vstools import CustomNotImplementedError, CustomValueError, vs
+from jetpytools import CustomNotImplementedError, CustomValueError
+from vstools import vs
 
 from ...data.parse import WobblyParser
 from ...types import FilteringPositionEnum

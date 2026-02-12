@@ -2,7 +2,8 @@ from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
 from typing import Any, Iterable, Self
 
-from vstools import CustomRuntimeError, CustomValueError, FrameRangesN, replace_ranges, vs
+from jetpytools import CustomRuntimeError, CustomValueError
+from vstools import FrameRangesN, replace_ranges, vs
 
 from ..types import FilteringPositionEnum
 from .decimations import Decimations

@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Any
 
-from vstools import CustomValueError, VSFunctionNoArgs, fallback, replace_ranges, vs
+from jetpytools import CustomValueError, fallback
+from vstools import VSFunctionNoArgs, replace_ranges, vs
 
 from ..exceptions import NegativeFrameError
 

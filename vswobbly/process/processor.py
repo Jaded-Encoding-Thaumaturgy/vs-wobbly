@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Self
 
-from vstools import FieldBased, SPathLike, vs
+from jetpytools import SPathLike
+from vstools import FieldBased, vs
 
 from vswobbly.data.parse import WobblyParser
 from vswobbly.types import FilteringPositionEnum

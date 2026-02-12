@@ -2,7 +2,8 @@ import ast
 from dataclasses import dataclass
 from typing import Any
 
-from vstools import CustomValueError, vs
+from jetpytools import CustomValueError
+from vstools import vs
 
 __all__ = [
     'Preset',

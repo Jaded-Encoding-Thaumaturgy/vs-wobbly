@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Any
 
-from vstools import CustomValueError, SPath, VSFunctionNoArgs, core, vs
+from jetpytools import CustomValueError, SPath
+from vstools import VSFunctionNoArgs, core, vs
 
 __all__ = [
     'WobblyVideo',

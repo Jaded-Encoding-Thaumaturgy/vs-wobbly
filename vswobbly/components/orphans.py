@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Self
 
-from vstools import CustomValueError, fallback, replace_ranges, vs
+from jetpytools import CustomValueError, fallback
+from vstools import replace_ranges, vs
 
 from ..exceptions import NegativeFrameError
 from .matches import FieldMatches, ValidMatchT
