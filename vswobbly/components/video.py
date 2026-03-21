@@ -26,11 +26,11 @@ class WobblyVideo:
     """The source filter to index the source file."""
 
     def __init__(self, src_file: SPath, wob_data: dict[str, Any]) -> None:
-        self.src_file = SPath(src_file)
+        self.src_file = SPath(wob_data.get('input file', str(src_file).removesuffix('.wob')))
         self._set_trim(wob_data)
 
         self.source_filter = self._validate_source_filter(wob_data.get('source filter', ''))
-        self._set_source_clip(wob_data.get('input file', str(self.src_file).removesuffix('.wob')))
+        self._set_source_clip(self.src_file)
 
     def _set_trim(self, wob_data: dict[str, Any]) -> None:
         trim_data = wob_data.get('trim')
