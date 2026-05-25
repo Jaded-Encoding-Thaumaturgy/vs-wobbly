@@ -1,0 +1,10 @@
+[project]
+name = "vs-wobbly"
+version = "0.4.0"
+description = "Vapoursynth wobbly project file parser and processing."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "vapoursynth>=74",
+    "vsjetpack>=1.5.0",
+]
